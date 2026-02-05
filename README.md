@@ -1,43 +1,85 @@
-# Svelte + Vite
+## Team Reveille – Student Profile Frontend
 
-This template should help get you started developing with Svelte in Vite.
+This project is a **Svelte + Vite** frontend for the TAMU CMIS / Team Reveille Student Core.  
+The current focus is the **Student Profile form**, which captures basic student identity information that will later be persisted via backend services.
 
-## Recommended IDE Setup
+### Tech Stack
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+- **Framework**: Svelte (created with `npm create vite@latest` – Svelte template)
+- **Bundler/Dev server**: Vite
+- **Language**: JavaScript
 
-## Need an official Svelte framework?
+### High-level Architecture
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+- `main.js` – Vite entry point. Mounts the root Svelte component into `index.html`:
+  - Imports `App.svelte`
+  - Calls `mount(App, { target: document.getElementById('app') })`
+- `App.svelte` – Root component for the app:
+  - Imports and renders the `ProfileForm` component.
+- `lib/ProfileForm.svelte` – Core UI for the **Student Profile**:
+  - Svelte component holding form state in local `let` variables.
+  - Styled with a **TAMU maroon** theme and responsive card layout.
 
-## Technical considerations
+### ProfileForm Component Details
 
-**Why use this over SvelteKit?**
+`src/lib/ProfileForm.svelte` contains:
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+- **Fields**
+  - `Name` – text, required
+  - `Major` – text, required
+  - `Class Year` – text, required (e.g., `'26`)
+  - `Grad Date` – month input, required
+  - `LinkedIn URL` – URL input, required
+- **State & behavior**
+  - Each input is bound to a local variable via `bind:value={...}`.
+  - `on:submit={handleSubmit}` prevents default submit and marks the form as “submitted” on the client.
+  - A simple success message confirms that the data has been captured **on the frontend only** (no backend calls yet).
+- **Styling**
+  - The form is presented in a centered card with:
+    - Top border and primary accents in **TAMU maroon** (`#500000`).
+    - Soft background, shadows, and focus outlines.
+    - Mobile-friendly spacing and typography.
 
-This template contains as little as possible to get started with Vite + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+This component is intentionally **frontend-only** for now; integration with Cognito, S3 presigned URLs, and DynamoDB references will happen in the backend or separate services.
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+### How It Works End-to-End (Current Frontend Only)
 
-**Why include `.vscode/extensions.json`?**
+1. **Vite dev server** serves `index.html`.
+2. `index.html` loads `src/main.js`.
+3. `main.js` mounts `<App />` into the `#app` div.
+4. `App.svelte` renders `<ProfileForm />` as the main page content.
+5. `ProfileForm.svelte`:
+   - Renders TAMU-themed fields for the student profile.
+   - Maintains field values in Svelte component state.
+   - On submit, prevents page reload and shows a success banner to indicate the data was captured in-memory.
 
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
+No data is persisted yet; this is strictly the UI building block for the broader Student Identity and Profile system.
 
-**Why enable `checkJs` in the JS template?**
+### Running the App Locally
 
-It is likely that most cases of changing variable types in runtime are likely to be accidental, rather than deliberate. This provides advanced typechecking out of the box. Should you like to take advantage of the dynamically-typed nature of JavaScript, it is trivial to change the configuration.
+Prerequisites:
 
-**Why is HMR not preserving my local component state?**
+- Node.js (LTS recommended)
+- npm
 
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/sveltejs/svelte-hmr/tree/master/packages/svelte-hmr#preservation-of-local-state).
+Install dependencies:
 
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```js
-// store.js
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
+```bash
+npm install
 ```
+
+Start the dev server:
+
+```bash
+npm run dev
+```
+
+Open the URL from the terminal (typically `http://localhost:5173/`) to view the Student Profile form.
+
+### Building for Production
+
+```bash
+npm run build
+```
+
+This outputs a production build in the `dist` folder, which can be served by any static file host.

@@ -1,4 +1,7 @@
+<script>
+  import ProfileForm from './lib/ProfileForm.svelte';
+</script>
+
 <main>
-  <h1>Hello, world!</h1>
-  <p>This is a basic Svelte frontend app.</p>
+  <ProfileForm />
 </main>
