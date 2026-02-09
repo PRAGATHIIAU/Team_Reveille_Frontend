@@ -1,7 +1,7 @@
 <script>
-  import ProfileForm from './lib/ProfileForm.svelte';
+  import LandingPage from './lib/LandingPage.svelte';
 </script>
 
-<main>
-  <ProfileForm />
-</main>
+<div class="landing-page">
+  <LandingPage />
+</div>
