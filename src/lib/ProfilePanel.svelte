@@ -4,6 +4,7 @@
   import { authUser } from './stores/authStore.js';
   import { currentView } from './stores/viewStore.js';
   import { fetchUserProfile, updateProfile } from './api.js';
+  import ResumeSection from './ResumeSection.svelte';
 
   let { open = $bindable(false) } = $props();
   let name = '';
@@ -163,6 +164,7 @@
           <p class="success-message">Profile updated.</p>
         {/if}
       </form>
+      <ResumeSection open={open} />
       <div class="panel-footer">
         <button type="button" class="btn-signout" on:click={handleSignOut}>Sign Out</button>
       </div>
