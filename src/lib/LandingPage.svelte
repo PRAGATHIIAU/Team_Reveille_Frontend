@@ -69,14 +69,14 @@
       <span class="logo-full">Council for the Management of Information Systems</span>
     </a>
     {#if $authUser}
-      <button type="button" class="btn-profile-icon" on:click={openProfile} aria-label="View profile">
+      <button type="button" class="btn-profile-icon" onclick={openProfile} aria-label="View profile">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M20.59 22C20.59 18.13 16.74 15 12 15C7.26 15 3.41 18.13 3.41 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
     {:else}
-      <button type="button" class="btn-signin" on:click={handleSignIn}>
+      <button type="button" class="btn-signin" onclick={handleSignIn}>
         Sign In
       </button>
     {/if}
@@ -89,7 +89,7 @@
   <section class="hero">
     <h1 class="hero-title">Engagement Platform</h1>
     <p class="hero-subtitle">
-      One place for student profiles, recruitment events, mentorship, and case competitions.
+      One place for events, mentorship, and case competitions.
     </p>
     <p class="hero-byline">Powered by the Council for the Management of Information Systems</p>
   </section>
@@ -97,22 +97,17 @@
   <section class="features">
     <h2 class="features-heading">What we offer</h2>
     <div class="features-grid">
-      <article class="feature-card">
-        <div class="feature-icon" aria-hidden="true">👤</div>
-        <h3 class="feature-title">Student Profiles</h3>
-        <p class="feature-desc">Build and maintain your profile. Showcase your background, skills, and goals to recruiters and mentors.</p>
-      </article>
-      <article class="feature-card">
+      <article class="feature-card" role="button" tabindex="0" onkeydown={(e) => e.key === 'Enter' && currentView.set('events')} onclick={() => currentView.set('events')}>
         <div class="feature-icon" aria-hidden="true">📅</div>
-        <h3 class="feature-title">Recruitment Events</h3>
+        <h3 class="feature-title">Events</h3>
         <p class="feature-desc">Discover and register for company info sessions, career fairs, and networking events.</p>
       </article>
-      <article class="feature-card">
+      <article class="feature-card" role="button" tabindex="0" onkeydown={(e) => e.key === 'Enter' && currentView.set('mentorship')} onclick={() => currentView.set('mentorship')}>
         <div class="feature-icon" aria-hidden="true">🤝</div>
         <h3 class="feature-title">Mentorship</h3>
         <p class="feature-desc">Connect with industry mentors and peers for guidance, feedback, and career advice.</p>
       </article>
-      <article class="feature-card">
+      <article class="feature-card" role="button" tabindex="0" onkeydown={(e) => e.key === 'Enter' && currentView.set('case-competitions')} onclick={() => currentView.set('case-competitions')}>
         <div class="feature-icon" aria-hidden="true">🏆</div>
         <h3 class="feature-title">Case Competitions</h3>
         <p class="feature-desc">Compete in case competitions, form teams, and track deadlines and results.</p>
@@ -123,11 +118,11 @@
   <section class="cta">
     <p class="cta-text">Ready to get started?</p>
     {#if $authUser}
-      <button type="button" class="btn-cta" on:click={openProfile}>
+      <button type="button" class="btn-cta" onclick={openProfile}>
         View Profile
       </button>
     {:else}
-      <button type="button" class="btn-cta" on:click={handleSignIn}>
+      <button type="button" class="btn-cta" onclick={handleSignIn}>
         Sign In
       </button>
     {/if}
@@ -312,6 +307,7 @@
     padding: 1.75rem;
     text-align: center;
     transition: box-shadow 0.2s, border-color 0.2s;
+    cursor: pointer;
   }
 
   .feature-card:hover {

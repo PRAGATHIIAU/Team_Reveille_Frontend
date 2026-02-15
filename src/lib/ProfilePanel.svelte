@@ -7,30 +7,43 @@
   import ResumeSection from './ResumeSection.svelte';
 
   let { open = $bindable(false) } = $props();
-  let name = '';
-  let uin = '';
-  let major = '';
-  let classYear = '';
-  let gradDate = '';
-  let linkedinUrl = '';
-  let resumeFileName = '';
-  let resumeS3Key = '';
-  let resumeFile = null;
-  let resumeError = '';
-  let saved = false;
-  let saveError = '';
-  let saving = false;
+  let name = $state('');
+  let uin = $state('');
+  let major = $state('');
+  let classYear = $state('');
+  let gradDate = $state('');
+  let linkedinUrl = $state('');
+  let resumeFileName = $state('');
+  let resumeS3Key = $state('');
+  let saved = $state(false);
+  let saveError = $state('');
+  let saving = $state(false);
 
-  // When panel opens, reset state and fetch latest profile from GET /api/profiles/me
+  function syncFormFromProfile() {
+    const p = $profile;
+    name = p.name ?? '';
+    uin = p.uin ?? '';
+    major = p.major ?? '';
+    classYear = p.classYear ?? '';
+    gradDate = p.gradDate ?? '';
+    linkedinUrl = p.linkedinUrl ?? '';
+    resumeFileName = p.resumeFileName ?? '';
+    resumeS3Key = p.resumeS3Key ?? '';
+  }
+
+  // When panel opens: fetch profile then sync form so data shows on first open.
+  // Using async so sync runs after fetch; $state() ensures assignments trigger re-render.
   $effect(() => {
-    if (open) {
-      saveError = '';
-      saved = false;
-      fetchUserProfile();
-    }
+    if (!open) return;
+    saveError = '';
+    saved = false;
+    (async () => {
+      await fetchUserProfile();
+      syncFormFromProfile();
+    })();
   });
 
-  // Sync form fields from profile store (updates when fetch or save completes)
+  // Sync form when profile store changes (e.g. after save).
   $effect(() => {
     if (open) {
       const p = $profile;
@@ -42,29 +55,8 @@
       linkedinUrl = p.linkedinUrl ?? '';
       resumeFileName = p.resumeFileName ?? '';
       resumeS3Key = p.resumeS3Key ?? '';
-      resumeFile = null;
-      resumeError = '';
     }
   });
-
-  function handleResumeChange(event) {
-    const file = event.target?.files?.[0];
-    resumeError = '';
-    resumeFile = null;
-    if (!file) return;
-    const maxSizeBytes = 5 * 1024 * 1024;
-    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
-    if (!isPdf) {
-      resumeError = 'Resume must be a PDF file (.pdf).';
-      return;
-    }
-    if (file.size > maxSizeBytes) {
-      resumeError = 'File size must be 5MB or smaller.';
-      return;
-    }
-    resumeFile = file;
-    resumeFileName = file.name;
-  }
 
   function closePanel() {
     open = false;
@@ -77,7 +69,6 @@
   async function handleSubmit(event) {
     event.preventDefault();
     saveError = '';
-    if (resumeError) return;
     saving = true;
     const result = await updateProfile({
       name,
@@ -94,7 +85,6 @@
       return;
     }
     saved = true;
-    resumeFile = null;
     closePanel();
   }
 
@@ -140,19 +130,7 @@
           <label for="profile-linkedinUrl">LinkedIn URL</label>
           <input id="profile-linkedinUrl" type="url" bind:value={linkedinUrl} required placeholder="https://www.linkedin.com/in/your-handle" />
         </div>
-        <div class="field">
-          <label for="profile-resume">Resume <span class="hint">(PDF only, max 5MB)</span></label>
-          <input id="profile-resume" type="file" accept="application/pdf" on:change={handleResumeChange} />
-          {#if resumeError}
-            <p class="error-message">{resumeError}</p>
-          {/if}
-          {#if resumeFileName && !resumeError}
-            <p class="file-info">Current: {resumeFileName}</p>
-          {/if}
-          {#if resumeFile}
-            <p class="file-info">New file selected: {resumeFile.name}</p>
-          {/if}
-        </div>
+        <ResumeSection open={open} />
         {#if saveError}
           <p class="error-message">{saveError}</p>
         {/if}
@@ -164,7 +142,6 @@
           <p class="success-message">Profile updated.</p>
         {/if}
       </form>
-      <ResumeSection open={open} />
       <div class="panel-footer">
         <button type="button" class="btn-signout" on:click={handleSignOut}>Sign Out</button>
       </div>
