@@ -17,26 +17,26 @@
     </a>
 
     <div class="card">
-    <div class="card-glow" aria-hidden="true"></div>
-    <div class="title-wrap">
-      <h1 class="collab-title">{title}</h1>
-      <span class="title-emoji" aria-hidden="true">
-        {#if title === 'Events'}
-          📅
-        {:else if title === 'Mentorship'}
-          🤝
-        {:else}
-          🏆
-        {/if}
-      </span>
+      <div class="card-glow" aria-hidden="true"></div>
+      <div class="title-wrap">
+        <h1 class="collab-title">{title}</h1>
+        <span class="title-emoji" aria-hidden="true">
+          {#if title === 'Events'}
+            📅
+          {:else if title === 'Mentorship'}
+            🤝
+          {:else}
+            🏆
+          {/if}
+        </span>
+      </div>
+      <p class="collab-content">{content}</p>
+      <div class="floating-dots" aria-hidden="true">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
     </div>
-    <p class="collab-content">{content}</p>
-    <div class="floating-dots" aria-hidden="true">
-      <span class="dot"></span>
-      <span class="dot"></span>
-      <span class="dot"></span>
-    </div>
-  </div>
   </div>
 </div>
 
