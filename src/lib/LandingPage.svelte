@@ -1,8 +1,64 @@
 <script>
+  import { onMount } from 'svelte';
   import { signInWithGoogle } from './auth.js';
+  import { authUser } from './stores/authStore.js';
+  import { currentView } from './stores/viewStore.js';
+  import ProfilePanel from './ProfilePanel.svelte';
+
+  let showProfilePanel = $state(false);
+
+  onMount(async () => {
+    const { getAuthUser, getSession } = await import('./auth.js');
+    const { checkIsFirstTimeSignIn, fetchUserProfile } = await import('./api.js');
+    const isOAuthCallback = typeof window !== 'undefined' && window.location.search.includes('code=');
+    
+    // After OAuth redirect, allow time for the auth module to exchange the code
+    if (isOAuthCallback) {
+      await new Promise((r) => setTimeout(r, 600));
+    }
+    
+    try {
+      const user = await getAuthUser();
+      authUser.set(user ?? null);
+
+      if (user) {
+        // Log ID token for signed-in user (for Postman / backend API testing; backend uses Bearer idToken)
+        let session = await getSession();
+        let idToken = session?.tokens?.idToken?.toString();
+        if (!idToken && isOAuthCallback) {
+          await new Promise((r) => setTimeout(r, 400));
+          session = await getSession();
+          idToken = session?.tokens?.idToken?.toString();
+        }
+        if (idToken) {
+          console.log('[auth] ID token (for API e.g. Postman):', idToken);
+        } else {
+          console.warn('[auth] Signed in but no id token in session:', session ? 'session exists, check tokens shape' : 'no session');
+        }
+      }
+
+      if (user && isOAuthCallback) {
+        // After successful sign-in: check first-time via backend (placeholder)
+        const isFirstTime = await checkIsFirstTimeSignIn(user);
+        if (isFirstTime) {
+          currentView.set('profile-form');
+        } else {
+          currentView.set('landing');
+          await fetchUserProfile(user); // Populate profile from backend (placeholder)
+        }
+      }
+    } catch {
+      authUser.set(null);
+      currentView.set('landing');
+    }
+  });
 
   async function handleSignIn() {
     await signInWithGoogle();
+  }
+
+  function openProfile() {
+    showProfilePanel = true;
   }
 </script>
 
@@ -12,11 +68,22 @@
       <span class="logo-acronym">CMIS</span>
       <span class="logo-full">Council for the Management of Information Systems</span>
     </a>
-    <button type="button" class="btn-signin" on:click={handleSignIn}>
-      Sign In
-    </button>
+    {#if $authUser}
+      <button type="button" class="btn-profile-icon" on:click={openProfile} aria-label="View profile">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M20.59 22C20.59 18.13 16.74 15 12 15C7.26 15 3.41 18.13 3.41 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    {:else}
+      <button type="button" class="btn-signin" on:click={handleSignIn}>
+        Sign In
+      </button>
+    {/if}
   </div>
 </header>
+
+<ProfilePanel bind:open={showProfilePanel} />
 
 <main class="main">
   <section class="hero">
@@ -55,9 +122,15 @@
 
   <section class="cta">
     <p class="cta-text">Ready to get started?</p>
-    <button type="button" class="btn-cta" on:click={handleSignIn}>
-      Sign In
-    </button>
+    {#if $authUser}
+      <button type="button" class="btn-cta" on:click={openProfile}>
+        View Profile
+      </button>
+    {:else}
+      <button type="button" class="btn-cta" on:click={handleSignIn}>
+        Sign In
+      </button>
+    {/if}
   </section>
 </main>
 
@@ -141,6 +214,41 @@
   .btn-signin:focus-visible {
     outline: 2px solid var(--cmis-gold);
     outline-offset: 2px;
+  }
+
+  .btn-profile-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--cmis-card-bg);
+    border: 2px solid var(--cmis-maroon);
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--cmis-maroon);
+    transition: background 0.2s, border-color 0.2s, transform 0.1s;
+  }
+
+  .btn-profile-icon:hover {
+    background: var(--cmis-maroon);
+    color: var(--cmis-card-bg);
+    transform: scale(1.05);
+  }
+
+  .btn-profile-icon:active {
+    transform: scale(0.95);
+  }
+
+  .btn-profile-icon:focus-visible {
+    outline: 2px solid var(--cmis-gold);
+    outline-offset: 2px;
+  }
+
+  .btn-profile-icon svg {
+    width: 1.25rem;
+    height: 1.25rem;
   }
 
   .main {

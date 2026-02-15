@@ -1,4 +1,9 @@
 <script>
+  import { onMount } from 'svelte';
+  import { profile } from './stores/profileStore.js';
+  import { currentView } from './stores/viewStore.js';
+  import { authUser } from './stores/authStore.js';
+
   let name = '';
   let major = '';
   let classYear = '';
@@ -8,6 +13,15 @@
   let resumeError = '';
 
   let submitted = false;
+
+  onMount(() => {
+    const p = $profile;
+    if (p.name) name = p.name;
+    if (p.major) major = p.major;
+    if (p.classYear) classYear = p.classYear;
+    if (p.gradDate) gradDate = p.gradDate;
+    if (p.linkedinUrl) linkedinUrl = p.linkedinUrl;
+  });
 
   const handleResumeChange = (event) => {
     const file = event.target.files?.[0];
@@ -35,17 +49,43 @@
     resumeFile = file;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Ensure resume is present and valid before "submitting"
     if (!resumeFile || resumeError) {
       resumeError = resumeError || 'Please upload a valid PDF resume (max 5MB).';
       submitted = false;
       return;
     }
 
+    profile.update((p) => ({
+      ...p,
+      name,
+      major,
+      classYear,
+      gradDate,
+      linkedinUrl,
+      resumeFileName: resumeFile.name,
+    }));
+
+    const user = $authUser;
+    if (user) {
+      localStorage.setItem(`cmis_profile_${user.userId}`, 'true');
+      localStorage.setItem(
+        `cmis_profile_data_${user.userId}`,
+        JSON.stringify({ name, major, classYear, gradDate, linkedinUrl, resumeFileName: resumeFile.name })
+      );
+    }
+
     submitted = true;
+
+    // TODO: Call backend API to save profile (see docs/API.md)
+    // const { saveProfile } = await import('./api.js');
+    // await saveProfile({ name, major, classYear, gradDate, linkedinUrl, resumeFile });
+
+    setTimeout(() => {
+      currentView.set('landing');
+    }, 1500);
   };
 </script>
 
