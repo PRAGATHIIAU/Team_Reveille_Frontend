@@ -3,30 +3,46 @@
   import { profile } from './stores/profileStore.js';
   import { authUser } from './stores/authStore.js';
   import { currentView } from './stores/viewStore.js';
+  import { fetchUserProfile, updateProfile } from './api.js';
 
   let { open = $bindable(false) } = $props();
   let name = '';
+  let uin = '';
   let major = '';
   let classYear = '';
   let gradDate = '';
   let linkedinUrl = '';
   let resumeFileName = '';
+  let resumeS3Key = '';
   let resumeFile = null;
   let resumeError = '';
   let saved = false;
+  let saveError = '';
+  let saving = false;
 
+  // When panel opens, reset state and fetch latest profile from GET /api/profiles/me
+  $effect(() => {
+    if (open) {
+      saveError = '';
+      saved = false;
+      fetchUserProfile();
+    }
+  });
+
+  // Sync form fields from profile store (updates when fetch or save completes)
   $effect(() => {
     if (open) {
       const p = $profile;
       name = p.name ?? '';
+      uin = p.uin ?? '';
       major = p.major ?? '';
       classYear = p.classYear ?? '';
       gradDate = p.gradDate ?? '';
       linkedinUrl = p.linkedinUrl ?? '';
       resumeFileName = p.resumeFileName ?? '';
+      resumeS3Key = p.resumeS3Key ?? '';
       resumeFile = null;
       resumeError = '';
-      saved = false;
     }
   });
 
@@ -57,24 +73,28 @@
     if (event.target === event.currentTarget) closePanel();
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
+    saveError = '';
     if (resumeError) return;
-    if (!resumeFileName && !resumeFile) {
-      resumeError = 'Please upload a PDF resume (max 5MB).';
-      return;
-    }
-    profile.update((p) => ({
-      ...p,
+    saving = true;
+    const result = await updateProfile({
       name,
+      uin,
       major,
       classYear,
       gradDate,
-      linkedinUrl,
-      resumeFileName: resumeFile ? resumeFile.name : (resumeFileName || p.resumeFileName),
-    }));
+      linkedInUrl: linkedinUrl || undefined,
+      resumeS3Key: resumeS3Key || undefined,
+    });
+    saving = false;
+    if (!result.ok) {
+      saveError = result.error || 'Failed to update profile.';
+      return;
+    }
     saved = true;
     resumeFile = null;
+    closePanel();
   }
 
   async function handleSignOut() {
@@ -98,6 +118,10 @@
         <div class="field">
           <label for="profile-name">Name</label>
           <input id="profile-name" type="text" bind:value={name} required placeholder="Your full name" />
+        </div>
+        <div class="field">
+          <label for="profile-uin">UIN</label>
+          <input id="profile-uin" type="text" bind:value={uin} required placeholder="e.g., 123456789" />
         </div>
         <div class="field">
           <label for="profile-major">Major</label>
@@ -128,9 +152,12 @@
             <p class="file-info">New file selected: {resumeFile.name}</p>
           {/if}
         </div>
+        {#if saveError}
+          <p class="error-message">{saveError}</p>
+        {/if}
         <div class="actions">
           <button type="button" class="btn-secondary" on:click={closePanel}>Cancel</button>
-          <button type="submit" class="btn-primary">Save changes</button>
+          <button type="submit" class="btn-primary" disabled={saving}>{saving ? 'Saving…' : 'Save changes'}</button>
         </div>
         {#if saved}
           <p class="success-message">Profile updated.</p>

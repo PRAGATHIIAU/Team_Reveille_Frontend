@@ -3,20 +3,24 @@
   import { profile } from './stores/profileStore.js';
   import { currentView } from './stores/viewStore.js';
   import { authUser } from './stores/authStore.js';
+  import { createProfile } from './api.js';
 
   let name = '';
+  let uin = '';
   let major = '';
   let classYear = '';
   let gradDate = '';
   let linkedinUrl = '';
   let resumeFile = null;
   let resumeError = '';
-
+  let submitError = '';
+  let submitting = false;
   let submitted = false;
 
   onMount(() => {
     const p = $profile;
     if (p.name) name = p.name;
+    if (p.uin) uin = p.uin;
     if (p.major) major = p.major;
     if (p.classYear) classYear = p.classYear;
     if (p.gradDate) gradDate = p.gradDate;
@@ -51,38 +55,31 @@
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+    submitError = '';
     if (!resumeFile || resumeError) {
       resumeError = resumeError || 'Please upload a valid PDF resume (max 5MB).';
       submitted = false;
       return;
     }
 
-    profile.update((p) => ({
-      ...p,
+    submitting = true;
+    const result = await createProfile({
       name,
+      uin,
       major,
       classYear,
       gradDate,
-      linkedinUrl,
-      resumeFileName: resumeFile.name,
-    }));
+      linkedInUrl: linkedinUrl || undefined,
+      resumeS3Key: null,
+    });
+    submitting = false;
 
-    const user = $authUser;
-    if (user) {
-      localStorage.setItem(`cmis_profile_${user.userId}`, 'true');
-      localStorage.setItem(
-        `cmis_profile_data_${user.userId}`,
-        JSON.stringify({ name, major, classYear, gradDate, linkedinUrl, resumeFileName: resumeFile.name })
-      );
+    if (!result.ok) {
+      submitError = result.error || 'Failed to create profile.';
+      return;
     }
 
     submitted = true;
-
-    // TODO: Call backend API to save profile (see docs/API.md)
-    // const { saveProfile } = await import('./api.js');
-    // await saveProfile({ name, major, classYear, gradDate, linkedinUrl, resumeFile });
-
     setTimeout(() => {
       currentView.set('landing');
     }, 1500);
@@ -104,6 +101,17 @@
         bind:value={name}
         required
         placeholder="Your full name"
+      />
+    </div>
+
+    <div class="field">
+      <label for="uin">UIN (University Identification Number)</label>
+      <input
+        id="uin"
+        type="text"
+        bind:value={uin}
+        required
+        placeholder="e.g., 123456789"
       />
     </div>
 
@@ -171,12 +179,16 @@
       {/if}
     </div>
 
-    <button type="submit" class="submit-button">
-      Save Profile
+    {#if submitError}
+      <p class="error-message">{submitError}</p>
+    {/if}
+
+    <button type="submit" class="submit-button" disabled={submitting}>
+      {submitting ? 'Saving…' : 'Save Profile'}
     </button>
 
     {#if submitted}
-      <p class="success-message">Profile captured on the client side (frontend only).</p>
+      <p class="success-message">Profile saved successfully.</p>
     {/if}
   </form>
 </section>

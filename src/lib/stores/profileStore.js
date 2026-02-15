@@ -2,11 +2,13 @@ import { writable } from 'svelte/store';
 
 const defaultProfile = () => ({
   name: '',
+  uin: '',
   major: '',
   classYear: '',
   gradDate: '',
   linkedinUrl: '',
   resumeFileName: '',
+  resumeS3Key: '',
 });
 
 /** @type {import('svelte/store').Writable<ReturnType<typeof defaultProfile>>} */
