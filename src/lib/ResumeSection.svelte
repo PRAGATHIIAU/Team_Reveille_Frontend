@@ -10,8 +10,11 @@
 
   let { open = true, onUploadSuccess } = $props();
 
+  // Fetch from GET /api/resumes/me whenever the section is shown (no stale data).
   $effect(() => {
-    if (open) loadResumes();
+    if (open) {
+      loadResumes();
+    }
   });
   let selectedFile = $state(null);
   let fileError = $state('');
@@ -53,6 +56,7 @@
 
   async function loadResumes() {
     listError = '';
+    resumes = [];
     listLoading = true;
     const result = await listMyResumes();
     listLoading = false;

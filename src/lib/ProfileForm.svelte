@@ -2,8 +2,8 @@
   import { onMount } from 'svelte';
   import { profile } from './stores/profileStore.js';
   import { currentView } from './stores/viewStore.js';
-  import { authUser } from './stores/authStore.js';
   import { createProfile } from './api.js';
+  import ResumeSection from './ResumeSection.svelte';
 
   let name = '';
   let uin = '';
@@ -11,8 +11,6 @@
   let classYear = '';
   let gradDate = '';
   let linkedinUrl = '';
-  let resumeFile = null;
-  let resumeError = '';
   let submitError = '';
   let submitting = false;
   let submitted = false;
@@ -27,40 +25,9 @@
     if (p.linkedinUrl) linkedinUrl = p.linkedinUrl;
   });
 
-  const handleResumeChange = (event) => {
-    const file = event.target.files?.[0];
-    resumeError = '';
-    resumeFile = null;
-
-    if (!file) {
-      return;
-    }
-
-    const maxSizeBytes = 5 * 1024 * 1024; // 5MB
-    const isPdfType = file.type === 'application/pdf';
-    const isPdfName = file.name.toLowerCase().endsWith('.pdf');
-
-    if (!isPdfType && !isPdfName) {
-      resumeError = 'Resume must be a PDF file (.pdf).';
-      return;
-    }
-
-    if (file.size > maxSizeBytes) {
-      resumeError = 'File size must be 5MB or smaller.';
-      return;
-    }
-
-    resumeFile = file;
-  };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
     submitError = '';
-    if (!resumeFile || resumeError) {
-      resumeError = resumeError || 'Please upload a valid PDF resume (max 5MB).';
-      submitted = false;
-      return;
-    }
 
     submitting = true;
     const result = await createProfile({
@@ -159,25 +126,7 @@
       />
     </div>
 
-    <div class="field">
-      <label for="resume">
-        Resume
-        <span class="hint">(PDF only, max 5MB)</span>
-      </label>
-      <input
-        id="resume"
-        type="file"
-        accept="application/pdf"
-        on:change={handleResumeChange}
-        required
-      />
-      {#if resumeError}
-        <p class="error-message">{resumeError}</p>
-      {/if}
-      {#if resumeFile && !resumeError}
-        <p class="file-info">Selected file: {resumeFile.name}</p>
-      {/if}
-    </div>
+    <ResumeSection open={true} />
 
     {#if submitError}
       <p class="error-message">{submitError}</p>

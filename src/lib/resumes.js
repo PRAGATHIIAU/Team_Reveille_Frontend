@@ -129,7 +129,10 @@ export async function completeUpload(resumeId) {
 export async function listMyResumes() {
   try {
     const headers = await getAuthHeaders();
-    const res = await fetch(`${API_BASE}/api/resumes/me`, { headers });
+    const res = await fetch(`${API_BASE}/api/resumes/me`, {
+      headers,
+      cache: 'no-store',
+    });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       return { ok: false, error: userFacingError(res, data), status: res.status };
