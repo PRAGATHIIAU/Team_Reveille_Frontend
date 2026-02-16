@@ -8,7 +8,7 @@
   let showProfilePanel = $state(false);
 
   onMount(async () => {
-    const { getAuthUser, getSession } = await import('./auth.js');
+    const { getAuthUser, getSession, getCognitoIdToken } = await import('./auth.js');
     const { checkIsFirstTimeSignIn, fetchUserProfile } = await import('./api.js');
     const isOAuthCallback = typeof window !== 'undefined' && window.location.search.includes('code=');
     
@@ -23,16 +23,15 @@
 
       if (user) {
         // Log ID token for signed-in user (for Postman / backend API testing; backend uses Bearer idToken)
-        let session = await getSession();
-        let idToken = session?.tokens?.idToken?.toString();
+        let idToken = await getCognitoIdToken();
         if (!idToken && isOAuthCallback) {
           await new Promise((r) => setTimeout(r, 400));
-          session = await getSession();
-          idToken = session?.tokens?.idToken?.toString();
+          idToken = await getCognitoIdToken();
         }
         if (idToken) {
           console.log('[auth] ID token (for API e.g. Postman):', idToken);
         } else {
+          const session = await getSession();
           console.warn('[auth] Signed in but no id token in session:', session ? 'session exists, check tokens shape' : 'no session');
         }
       }
@@ -112,6 +111,13 @@
         <h3 class="feature-title">Case Competitions</h3>
         <p class="feature-desc">Compete in case competitions, form teams, and track deadlines and results.</p>
       </article>
+      {#if $authUser}
+        <article class="feature-card" role="button" tabindex="0" onkeydown={(e) => e.key === 'Enter' && currentView.set('students-connect')} onclick={() => currentView.set('students-connect')}>
+          <div class="feature-icon" aria-hidden="true">👥</div>
+          <h3 class="feature-title">Students Connect</h3>
+          <p class="feature-desc">Browse other CMIS students, filter by major and degree, and connect via LinkedIn.</p>
+        </article>
+      {/if}
     </div>
   </section>
 
@@ -134,27 +140,14 @@
 </footer>
 
 <style>
-  :global(.landing-page) {
-    --cmis-maroon: #500000;
-    --cmis-maroon-dark: #3d0000;
-    --cmis-maroon-light: #6b0f0f;
-    --cmis-gold: #c68c53;
-    --cmis-bg: #faf8f6;
-    --cmis-card-bg: #ffffff;
-    --cmis-text: #1a1a1a;
-    --cmis-text-muted: #5c5c5c;
-    --cmis-border: #e8e4e0;
-    --header-height: 4rem;
-  }
-
   .header {
     position: sticky;
     top: 0;
     z-index: 100;
     height: var(--header-height);
-    background: var(--cmis-card-bg);
-    border-bottom: 2px solid var(--cmis-maroon);
-    box-shadow: 0 2px 8px rgba(80, 0, 0, 0.06);
+    background: var(--card-bg);
+    border-bottom: 3px solid var(--maroon);
+    box-shadow: var(--shadow-sm);
   }
 
   .header-inner {
@@ -170,44 +163,51 @@
   .logo {
     display: flex;
     flex-direction: column;
-    gap: 0.1rem;
+    gap: 0.15rem;
     text-decoration: none;
-    color: var(--cmis-text);
+    color: var(--text);
+  }
+
+  .logo:hover {
+    text-decoration: none;
   }
 
   .logo-acronym {
-    font-size: 1.35rem;
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
     font-weight: 700;
-    letter-spacing: 0.02em;
-    color: var(--cmis-maroon);
+    letter-spacing: 0.03em;
+    color: var(--maroon);
   }
 
   .logo-full {
     font-size: 0.7rem;
-    color: var(--cmis-text-muted);
+    color: var(--text-muted);
     font-weight: 500;
-    letter-spacing: 0.01em;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
   }
 
   .btn-signin {
-    padding: 0.5rem 1.25rem;
+    padding: 0.5rem 1.35rem;
     font-size: 0.95rem;
     font-weight: 600;
-    color: var(--cmis-card-bg);
-    background: var(--cmis-maroon);
-    border: 2px solid var(--cmis-maroon);
-    border-radius: 6px;
+    color: var(--card-bg);
+    background: var(--maroon);
+    border: 2px solid var(--maroon);
+    border-radius: var(--radius);
     cursor: pointer;
-    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
   }
 
   .btn-signin:hover {
-    background: var(--cmis-maroon-dark);
-    border-color: var(--cmis-maroon-dark);
+    background: var(--maroon-dark);
+    border-color: var(--maroon-dark);
+    box-shadow: var(--shadow);
   }
 
   .btn-signin:focus-visible {
-    outline: 2px solid var(--cmis-gold);
+    outline: 2px solid var(--gold);
     outline-offset: 2px;
   }
 
@@ -218,26 +218,26 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--cmis-card-bg);
-    border: 2px solid var(--cmis-maroon);
+    background: var(--card-bg);
+    border: 2px solid var(--maroon);
     border-radius: 50%;
     cursor: pointer;
-    color: var(--cmis-maroon);
-    transition: background 0.2s, border-color 0.2s, transform 0.1s;
+    color: var(--maroon);
+    transition: background 0.2s, border-color 0.2s, transform 0.15s, color 0.2s;
   }
 
   .btn-profile-icon:hover {
-    background: var(--cmis-maroon);
-    color: var(--cmis-card-bg);
+    background: var(--maroon);
+    color: var(--card-bg);
     transform: scale(1.05);
   }
 
   .btn-profile-icon:active {
-    transform: scale(0.95);
+    transform: scale(0.98);
   }
 
   .btn-profile-icon:focus-visible {
-    outline: 2px solid var(--cmis-gold);
+    outline: 2px solid var(--gold);
     outline-offset: 2px;
   }
 
@@ -247,133 +247,186 @@
   }
 
   .main {
-    min-height: calc(100vh - var(--header-height) - 120px);
-    background: var(--cmis-bg);
+    min-height: calc(100vh - var(--header-height) - 140px);
+    background: linear-gradient(180deg, var(--bg) 0%, var(--bg-warm) 100%);
+    position: relative;
+  }
+
+  .main::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 320px;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, var(--maroon-muted) 0%, transparent 70%);
+    pointer-events: none;
   }
 
   .hero {
+    position: relative;
     max-width: 720px;
     margin: 0 auto;
-    padding: 4rem 1.5rem 3rem;
+    padding: 4.5rem 1.5rem 3.5rem;
     text-align: center;
   }
 
   .hero-title {
-    font-size: clamp(2rem, 5vw, 3rem);
+    font-family: var(--font-heading);
+    font-size: clamp(2.25rem, 5vw, 3.25rem);
     font-weight: 700;
-    color: var(--cmis-maroon);
-    margin: 0 0 0.75rem;
+    color: var(--maroon);
+    margin: 0 0 0.85rem;
     letter-spacing: -0.02em;
-    line-height: 1.15;
+    line-height: 1.12;
   }
 
   .hero-subtitle {
     font-size: 1.2rem;
     line-height: 1.6;
-    color: var(--cmis-text);
+    color: var(--text);
     margin: 0 0 0.5rem;
+    font-weight: 500;
   }
 
   .hero-byline {
     font-size: 0.9rem;
-    color: var(--cmis-text-muted);
+    color: var(--text-muted);
     margin: 0;
+    letter-spacing: 0.01em;
   }
 
   .features {
+    position: relative;
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem 1.5rem 4rem;
   }
 
   .features-heading {
-    font-size: 1.5rem;
+    font-family: var(--font-heading);
+    font-size: 1.65rem;
     font-weight: 600;
-    color: var(--cmis-text);
+    color: var(--text);
     text-align: center;
-    margin: 0 0 2rem;
+    margin: 0 0 2.25rem;
+    letter-spacing: -0.01em;
   }
 
   .features-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.75rem;
   }
 
   .feature-card {
-    background: var(--cmis-card-bg);
-    border: 1px solid var(--cmis-border);
-    border-radius: 10px;
-    padding: 1.75rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem 1.75rem;
     text-align: center;
-    transition: box-shadow 0.2s, border-color 0.2s;
+    transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--maroon), var(--gold));
+    opacity: 0;
+    transition: opacity 0.25s ease;
   }
 
   .feature-card:hover {
-    box-shadow: 0 8px 24px rgba(80, 0, 0, 0.08);
-    border-color: var(--cmis-maroon-light);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--maroon-light);
+    transform: translateY(-2px);
+  }
+
+  .feature-card:hover::before {
+    opacity: 1;
+  }
+
+  .feature-card:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
   }
 
   .feature-icon {
-    font-size: 2.25rem;
-    margin-bottom: 0.75rem;
+    font-size: 2.5rem;
+    margin-bottom: 0.85rem;
+    line-height: 1;
   }
 
   .feature-title {
-    font-size: 1.1rem;
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
     font-weight: 600;
-    color: var(--cmis-maroon);
+    color: var(--maroon);
     margin: 0 0 0.5rem;
   }
 
   .feature-desc {
-    font-size: 0.9rem;
-    line-height: 1.5;
-    color: var(--cmis-text-muted);
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--text-muted);
     margin: 0;
   }
 
   .cta {
+    position: relative;
     text-align: center;
-    padding: 2rem 1.5rem 3rem;
+    padding: 2.5rem 1.5rem 3.5rem;
   }
 
   .cta-text {
     font-size: 1.1rem;
-    color: var(--cmis-text-muted);
-    margin: 0 0 1rem;
+    color: var(--text-muted);
+    margin: 0 0 1.25rem;
+    font-weight: 500;
   }
 
   .btn-cta {
-    padding: 0.6rem 1.5rem;
+    padding: 0.65rem 1.75rem;
     font-size: 1rem;
     font-weight: 600;
-    color: var(--cmis-card-bg);
-    background: var(--cmis-maroon);
-    border: 2px solid var(--cmis-maroon);
-    border-radius: 6px;
+    color: var(--card-bg);
+    background: var(--maroon);
+    border: 2px solid var(--maroon);
+    border-radius: var(--radius);
     cursor: pointer;
-    transition: background 0.2s, border-color 0.2s;
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s;
   }
 
   .btn-cta:hover {
-    background: var(--cmis-maroon-dark);
-    border-color: var(--cmis-maroon-dark);
+    background: var(--maroon-dark);
+    border-color: var(--maroon-dark);
+    box-shadow: var(--shadow);
+    transform: translateY(-1px);
+  }
+
+  .btn-cta:active {
+    transform: translateY(0);
   }
 
   .btn-cta:focus-visible {
-    outline: 2px solid var(--cmis-gold);
+    outline: 2px solid var(--gold);
     outline-offset: 2px;
   }
 
   .footer {
-    padding: 1.5rem;
+    padding: 1.5rem 1.5rem 1.75rem;
     text-align: center;
     font-size: 0.8rem;
-    color: var(--cmis-text-muted);
-    background: var(--cmis-card-bg);
-    border-top: 1px solid var(--cmis-border);
+    color: var(--text-muted);
+    background: var(--card-bg);
+    border-top: 1px solid var(--border);
   }
 
   .footer p {

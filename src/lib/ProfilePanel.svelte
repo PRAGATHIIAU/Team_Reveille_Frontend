@@ -186,7 +186,9 @@
     position: fixed;
     inset: 0;
     z-index: 200;
-    background: rgba(0, 0, 0, 0.45);
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -194,15 +196,15 @@
   }
 
   .panel {
-    background: var(--cmis-card-bg, #fff);
-    border-radius: 12px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
-    border-top: 6px solid var(--cmis-maroon, #500000);
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg), 0 0 0 1px var(--border);
+    border-top: 4px solid var(--maroon);
     max-width: 520px;
     width: 100%;
     max-height: 90vh;
     overflow-y: auto;
-    padding: 1.5rem 1.75rem;
+    padding: 1.75rem 2rem;
   }
 
   .panel-header {
@@ -214,10 +216,11 @@
   }
 
   .panel-header h2 {
+    font-family: var(--font-heading);
     margin: 0;
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--cmis-maroon, #500000);
+    color: var(--maroon);
   }
 
   .btn-close {
@@ -229,19 +232,20 @@
     font-size: 1.5rem;
     line-height: 1;
     cursor: pointer;
-    color: var(--cmis-text-muted, #5c5c5c);
-    border-radius: 6px;
+    color: var(--text-muted);
+    border-radius: var(--radius);
+    transition: background 0.15s, color 0.15s;
   }
 
   .btn-close:hover {
-    background: #eee;
-    color: #1a1a1a;
+    background: var(--maroon-muted);
+    color: var(--maroon);
   }
 
   .panel-subtitle {
     margin: 0 0 1.25rem;
     font-size: 0.9rem;
-    color: var(--cmis-text-muted, #5c5c5c);
+    color: var(--text-muted);
   }
 
   .profile-form {
@@ -258,37 +262,39 @@
   label {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #3a3a3a;
+    color: var(--text);
   }
 
   .hint {
     font-weight: 400;
     font-size: 0.8rem;
-    color: #7a7a7a;
+    color: var(--text-muted);
     margin-left: 0.25rem;
   }
 
   input {
-    padding: 0.55rem 0.7rem;
+    padding: 0.55rem 0.75rem;
     font-size: 0.95rem;
-    border-radius: 6px;
-    border: 1px solid #c9c3bc;
-    background: #fdfbf9;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg);
+    transition: border-color 0.15s, box-shadow 0.15s;
   }
 
-  input:focus, select:focus {
+  input:focus,
+  select:focus {
     outline: none;
-    border-color: var(--cmis-maroon, #500000);
-    box-shadow: 0 0 0 2px rgba(80, 0, 0, 0.15);
+    border-color: var(--maroon);
+    box-shadow: 0 0 0 2px var(--maroon-muted);
   }
 
   select {
-    padding: 0.55rem 0.7rem;
+    padding: 0.55rem 0.75rem;
     font-size: 0.95rem;
-    border-radius: 6px;
-    border: 1px solid #c9c3bc;
-    background: #fdfbf9;
-    color: #1a1a1a;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
     cursor: pointer;
   }
 
@@ -302,31 +308,34 @@
     padding: 0.55rem 1.25rem;
     font-size: 0.95rem;
     font-weight: 600;
-    color: #fff;
-    background: var(--cmis-maroon, #500000);
-    border: 2px solid var(--cmis-maroon, #500000);
-    border-radius: 6px;
+    color: var(--card-bg);
+    background: var(--maroon);
+    border: 2px solid var(--maroon);
+    border-radius: var(--radius);
     cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
   }
 
-  .btn-primary:hover {
-    background: var(--cmis-maroon-dark, #3d0000);
-    border-color: var(--cmis-maroon-dark, #3d0000);
+  .btn-primary:hover:not(:disabled) {
+    background: var(--maroon-dark);
+    border-color: var(--maroon-dark);
+    box-shadow: var(--shadow);
   }
 
   .btn-secondary {
     padding: 0.55rem 1.25rem;
     font-size: 0.95rem;
     font-weight: 600;
-    color: var(--cmis-text, #1a1a1a);
-    background: #eee;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
   }
 
   .btn-secondary:hover {
-    background: #e0e0e0;
+    background: var(--border);
   }
 
   .success-message {
@@ -334,7 +343,7 @@
     font-size: 0.9rem;
     color: #155724;
     background: #d4edda;
-    border-radius: 6px;
+    border-radius: var(--radius);
     padding: 0.5rem 0.75rem;
   }
 
@@ -343,36 +352,37 @@
     font-size: 0.85rem;
     color: #721c24;
     background: #f8d7da;
-    border-radius: 4px;
+    border-radius: var(--radius);
     padding: 0.4rem 0.6rem;
   }
 
   .file-info {
     margin-top: 0.25rem;
     font-size: 0.85rem;
-    color: #3a3a3a;
+    color: var(--text);
   }
 
   .panel-footer {
     margin-top: 1.5rem;
     padding-top: 1rem;
-    border-top: 1px solid var(--cmis-border, #e8e4e0);
+    border-top: 1px solid var(--border);
   }
 
   .btn-signout {
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
     font-weight: 500;
-    color: var(--cmis-text-muted, #5c5c5c);
+    color: var(--text-muted);
     background: transparent;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     cursor: pointer;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
   }
 
   .btn-signout:hover {
-    color: #1a1a1a;
-    background: #f0f0f0;
-    border-color: #999;
+    color: var(--maroon);
+    background: var(--maroon-muted);
+    border-color: var(--maroon-light);
   }
 </style>

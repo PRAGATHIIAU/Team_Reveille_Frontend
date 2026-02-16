@@ -47,9 +47,9 @@
     min-height: 100dvh;
     padding: 2.5rem 1.5rem;
     margin: 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: linear-gradient(160deg, #faf8f6 0%, #f0ebe6 40%, #e8e0d8 100%);
-    color: #1a1a1a;
+    font-family: var(--font-body);
+    background: linear-gradient(160deg, var(--bg) 0%, var(--bg-warm) 40%, #ebe6e0 100%);
+    color: var(--text);
     position: relative;
     overflow: hidden;
     box-sizing: border-box;
@@ -67,7 +67,7 @@
     right: -30%;
     width: 80%;
     height: 80%;
-    background: radial-gradient(ellipse, rgba(80, 0, 0, 0.04) 0%, transparent 70%);
+    background: radial-gradient(ellipse, var(--maroon-muted) 0%, transparent 70%);
     pointer-events: none;
   }
 
@@ -77,7 +77,7 @@
     gap: 0.35rem;
     margin-bottom: 2rem;
     font-size: 0.95rem;
-    color: #500000;
+    color: var(--maroon);
     text-decoration: none;
     font-weight: 600;
     letter-spacing: 0.02em;
@@ -85,8 +85,9 @@
   }
 
   .back-link:hover {
-    color: #3d0000;
+    color: var(--maroon-dark);
     transform: translateX(-4px);
+    text-decoration: none;
   }
 
   .back-link:active {
@@ -110,13 +111,10 @@
 
   .card {
     position: relative;
-    background: #fff;
-    border-radius: 20px;
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
     padding: 2.5rem 2rem;
-    box-shadow:
-      0 4px 6px rgba(80, 0, 0, 0.04),
-      0 12px 24px rgba(80, 0, 0, 0.06),
-      0 0 0 1px rgba(80, 0, 0, 0.06);
+    box-shadow: var(--shadow-lg), 0 0 0 1px var(--border);
     animation: cardIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     overflow: hidden;
   }
@@ -139,7 +137,7 @@
     transform: translateX(-50%);
     width: 200px;
     height: 200px;
-    background: radial-gradient(circle, rgba(198, 140, 83, 0.15) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--gold-light) 0%, transparent 70%);
     animation: glowPulse 4s ease-in-out infinite;
   }
 
@@ -158,10 +156,11 @@
   }
 
   .collab-title {
+    font-family: var(--font-heading);
     margin: 0;
     font-size: clamp(1.75rem, 4vw, 2.25rem);
-    font-weight: 800;
-    color: #500000;
+    font-weight: 700;
+    color: var(--maroon);
     letter-spacing: -0.02em;
     animation: titleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
   }
@@ -200,9 +199,9 @@
 
   .collab-content {
     margin: 0;
-    font-size: clamp(1.5rem, 4vw, 2.25rem);
+    font-size: clamp(1.1rem, 2.5vw, 1.35rem);
     line-height: 1.6;
-    color: #4a4a4a;
+    color: var(--text-muted);
     text-align: center;
     animation: contentIn 0.5s ease 0.3s both;
   }
@@ -231,7 +230,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #c68c53;
+    background: var(--gold);
     opacity: 0.6;
     animation: dotBounce 1.2s ease-in-out infinite;
   }

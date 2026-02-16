@@ -2,7 +2,7 @@
  * Backend API client. See docs/API.md for full API documentation.
  */
 
-import { getSession } from './auth.js';
+import { getCognitoIdToken } from './auth.js';
 import { profile } from './stores/profileStore.js';
 
 const API_BASE =
@@ -11,10 +11,11 @@ const API_BASE =
     : 'https://2gzy1e8qga.execute-api.us-east-1.amazonaws.com/dev';
 
 const getAuthHeaders = async () => {
-  const session = await getSession();
-  const idToken = session?.tokens?.idToken?.toString();
   const headers = { 'Content-Type': 'application/json' };
-  if (idToken) headers['Authorization'] = `Bearer ${idToken}`;
+  const idToken = await getCognitoIdToken();
+  if (idToken) {
+    headers['Authorization'] = `Bearer ${idToken}`;
+  }
   return headers;
 };
 
@@ -164,5 +165,25 @@ export async function updateProfile(body) {
     return { ok: true, data };
   } catch (err) {
     return { ok: false, error: err?.message || 'Network error' };
+  }
+}
+
+/**
+ * List student profiles (excluding current user). Backend returns all profiles; filtering is done on the frontend.
+ * @returns {Promise<{ ok: boolean; profiles?: Array<{ name?: string; uin?: string; degree?: string; major?: string; gradDate?: string; linkedInUrl?: string }>; error?: string }>}
+ */
+export async function listProfiles() {
+  try {
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${API_BASE}/api/profiles`, { headers });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return { ok: false, error: data.message || res.statusText || 'Failed to load students' };
+    }
+    const data = await res.json();
+    const profiles = Array.isArray(data.profiles) ? data.profiles : (Array.isArray(data) ? data : []);
+    return { ok: true, profiles };
+  } catch (err) {
+    return { ok: false, error: err?.message || 'Network error', profiles: [] };
   }
 }

@@ -205,14 +205,15 @@
   .resume-section {
     margin-top: 1.5rem;
     padding-top: 1.25rem;
-    border-top: 1px solid var(--cmis-border, #e8e4e0);
+    border-top: 1px solid var(--border);
   }
 
   .resume-heading {
+    font-family: var(--font-heading);
     margin: 0 0 0.75rem;
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--cmis-maroon, #500000);
+    color: var(--maroon);
   }
 
   .resume-upload {
@@ -270,7 +271,7 @@
     left: 0;
     top: 0;
     bottom: 0;
-    background: var(--cmis-maroon, #500000);
+    background: var(--maroon);
     transition: width 0.2s ease;
   }
 
@@ -291,15 +292,15 @@
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #fff;
-    background: var(--cmis-maroon, #500000);
+    color: var(--card-bg);
+    background: var(--maroon);
     border: none;
-    border-radius: 6px;
+    border-radius: var(--radius);
     cursor: pointer;
   }
 
   .btn-upload:hover:not(:disabled) {
-    background: var(--cmis-maroon-dark, #3d0000);
+    background: var(--maroon-dark);
   }
 
   .btn-upload:disabled {
@@ -317,7 +318,7 @@
   .muted {
     margin: 0;
     font-size: 0.9rem;
-    color: var(--cmis-text-muted, #5c5c5c);
+    color: var(--text-muted);
   }
 
   .resume-items {
@@ -332,7 +333,7 @@
     justify-content: space-between;
     gap: 0.75rem;
     padding: 0.5rem 0;
-    border-bottom: 1px solid var(--cmis-border, #e8e4e0);
+    border-bottom: 1px solid var(--border);
   }
 
   .resume-item-label {
@@ -348,16 +349,16 @@
     padding: 0.35rem 0.75rem;
     font-size: 0.85rem;
     font-weight: 500;
-    color: var(--cmis-maroon, #500000);
+    color: var(--maroon);
     background: transparent;
-    border: 1px solid var(--cmis-maroon, #500000);
-    border-radius: 6px;
+    border: 1px solid var(--maroon);
+    border-radius: var(--radius);
     cursor: pointer;
   }
 
   .btn-download:hover:not(:disabled) {
-    background: var(--cmis-maroon, #500000);
-    color: #fff;
+    background: var(--maroon);
+    color: var(--card-bg);
   }
 
   .btn-download:disabled {

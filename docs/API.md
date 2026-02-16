@@ -178,6 +178,27 @@ Frontend should write this into the profile store so the profile panel and form 
 
 ---
 
+## 5. List student profiles (Students Connect)
+
+**Purpose:** List all student profiles except the current user. Filtering by name, major, and degree is done on the frontend.
+
+| Field       | Value |
+|------------|--------|
+| **Called from** | `src/lib/StudentsConnect.svelte` |
+| **Function**   | `src/lib/api.js` → `listProfiles()` |
+
+### Backend API
+
+| Field   | Value |
+|--------|--------|
+| **Method** | `GET` |
+| **Path**   | `/api/profiles` |
+| **Auth**   | Required (backend must exclude current user from results) |
+
+**Response shape:** `{ profiles: [{ name, uin, degree, major, gradDate, linkedInUrl }] }`
+
+---
+
 ## Summary
 
 | # | Purpose                         | Method | URL (to implement)              | Called from              | Status        |
@@ -186,6 +207,7 @@ Frontend should write this into the profile store so the profile panel and form 
 | 2 | Fetch user profile              | GET    | `/api/profiles/me`              | LandingPage (not first-time) | Placeholder   |
 | 3 | Save / update profile           | PUT    | `/api/profiles/me`               | ProfileForm, ProfilePanel | Placeholder   |
 | 4 | Presigned URL for resume upload | POST   | `/api/profiles/resume/presigned-url` | Before profile save       | Not implemented |
+| 5 | List students (Students Connect)| GET    | `/api/profiles`                     | StudentsConnect           | To implement  |
 
 ---
 

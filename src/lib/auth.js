@@ -66,4 +66,31 @@ export async function getSession() {
   }
 }
 
+/**
+ * Get the Cognito ID token as a raw JWT string for the Authorization header.
+ * Returns the full token so the client can send exactly: Authorization: Bearer <token>
+ * @returns {Promise<string | null>} The full ID token JWT string, or null if not signed in / no token.
+ */
+export async function getCognitoIdToken() {
+  if (!isAuthConfigured()) return null;
+  try {
+    const session = await fetchAuthSession();
+    const idToken = session?.tokens?.idToken;
+    if (idToken == null) return null;
+    const raw =
+      typeof idToken === 'string'
+        ? idToken
+        : typeof idToken?.toString === 'function'
+          ? idToken.toString()
+          : null;
+    if (!raw || typeof raw !== 'string' || raw.trim() === '') return null;
+    const trimmed = raw.trim();
+    const parts = trimmed.split('.');
+    if (parts.length !== 3) return null;
+    return trimmed;
+  } catch {
+    return null;
+  }
+}
+
 export { isAuthConfigured };

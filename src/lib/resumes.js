@@ -4,7 +4,7 @@
  * Do NOT send Authorization to the presigned S3 PUT URL.
  */
 
-import { getSession } from './auth.js';
+import { getCognitoIdToken } from './auth.js';
 
 const API_BASE =
   typeof import.meta.env?.VITE_API_BASE_URL === 'string' && import.meta.env.VITE_API_BASE_URL
@@ -14,10 +14,11 @@ const API_BASE =
 const PDF_MAX_BYTES = 5 * 1024 * 1024; // 5MB
 
 async function getAuthHeaders() {
-  const session = await getSession();
-  const idToken = session?.tokens?.idToken?.toString();
   const headers = { 'Content-Type': 'application/json' };
-  if (idToken) headers['Authorization'] = `Bearer ${idToken}`;
+  const idToken = await getCognitoIdToken();
+  if (idToken) {
+    headers['Authorization'] = `Bearer ${idToken}`;
+  }
   return headers;
 }
 

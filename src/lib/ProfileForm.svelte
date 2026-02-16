@@ -169,32 +169,34 @@
 <style>
   :global(body) {
     margin: 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background-color: #f5f0eb;
-    color: #1b1b1b;
+    font-family: var(--font-body);
+    background: linear-gradient(180deg, var(--bg) 0%, var(--bg-warm) 100%);
+    color: var(--text);
+    min-height: 100vh;
   }
 
   .profile-form-container {
     max-width: 640px;
     margin: 3rem auto;
     padding: 2.5rem 2rem;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
-    border-top: 6px solid #500000; /* TAMU maroon */
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg), 0 0 0 1px var(--border);
+    border-top: 4px solid var(--maroon);
   }
 
   .heading {
+    font-family: var(--font-heading);
     margin: 0 0 0.5rem;
     font-size: 1.9rem;
     font-weight: 700;
-    color: #500000; /* TAMU maroon */
+    color: var(--maroon);
   }
 
   .subheading {
     margin: 0 0 1.5rem;
     font-size: 0.95rem;
-    color: #4a4a4a;
+    color: var(--text-muted);
   }
 
   .profile-form {
@@ -211,53 +213,54 @@
   label {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #3a3a3a;
+    color: var(--text);
   }
 
   .hint {
     font-weight: 400;
     font-size: 0.8rem;
-    color: #7a7a7a;
+    color: var(--text-muted);
     margin-left: 0.25rem;
   }
 
   input {
     padding: 0.6rem 0.75rem;
     font-size: 0.95rem;
-    border-radius: 6px;
-    border: 1px solid #c9c3bc;
-    background-color: #fdfbf9;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg);
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
   }
 
   input::placeholder {
-    color: #b0a79e;
+    color: var(--text-muted);
   }
 
-  input:focus, select:focus {
+  input:focus,
+  select:focus {
     outline: none;
-    border-color: #500000;
-    box-shadow: 0 0 0 2px rgba(80, 0, 0, 0.16);
-    background-color: #ffffff;
+    border-color: var(--maroon);
+    box-shadow: 0 0 0 2px var(--maroon-muted);
+    background: var(--card-bg);
   }
 
   select {
     padding: 0.6rem 0.75rem;
     font-size: 0.95rem;
-    border-radius: 6px;
-    border: 1px solid #c9c3bc;
-    background-color: #fdfbf9;
-    color: #1b1b1b;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
     cursor: pointer;
   }
 
   .submit-button {
     margin-top: 0.5rem;
-    padding: 0.7rem 1.2rem;
-    border-radius: 999px;
-    border: none;
-    background-color: #500000; /* TAMU maroon */
-    color: #ffffff;
+    padding: 0.7rem 1.5rem;
+    border-radius: var(--radius);
+    border: 2px solid var(--maroon);
+    background: var(--maroon);
+    color: var(--card-bg);
     font-size: 0.98rem;
     font-weight: 600;
     letter-spacing: 0.02em;
@@ -267,27 +270,32 @@
     align-items: center;
     justify-content: center;
     gap: 0.4rem;
-    box-shadow: 0 8px 20px rgba(80, 0, 0, 0.35);
-    transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+    box-shadow: var(--shadow);
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s;
   }
 
-  .submit-button:hover {
-    background-color: #380000;
-    box-shadow: 0 10px 24px rgba(80, 0, 0, 0.45);
+  .submit-button:hover:not(:disabled) {
+    background: var(--maroon-dark);
+    border-color: var(--maroon-dark);
+    box-shadow: var(--shadow-lg);
     transform: translateY(-1px);
   }
 
   .submit-button:active {
     transform: translateY(0);
-    box-shadow: 0 4px 12px rgba(80, 0, 0, 0.35);
+  }
+
+  .submit-button:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
   }
 
   .success-message {
     margin-top: 0.75rem;
     font-size: 0.9rem;
     color: #155724;
-    background-color: #d4edda;
-    border-radius: 6px;
+    background: #d4edda;
+    border-radius: var(--radius);
     padding: 0.5rem 0.75rem;
   }
 
@@ -295,15 +303,15 @@
     margin-top: 0.25rem;
     font-size: 0.85rem;
     color: #721c24;
-    background-color: #f8d7da;
-    border-radius: 4px;
+    background: #f8d7da;
+    border-radius: var(--radius);
     padding: 0.4rem 0.6rem;
   }
 
   .file-info {
     margin-top: 0.25rem;
     font-size: 0.85rem;
-    color: #3a3a3a;
+    color: var(--text);
   }
 
   @media (max-width: 600px) {
