@@ -5,30 +5,38 @@
   import { currentView } from './stores/viewStore.js';
   import { fetchUserProfile, updateProfile } from './api.js';
   import ResumeSection from './ResumeSection.svelte';
+  import { DEGREE_OPTIONS, MAJOR_OPTIONS, validateUin } from './profileOptions.js';
 
   let { open = $bindable(false) } = $props();
   let name = $state('');
   let uin = $state('');
+  let degree = $state('');
   let major = $state('');
-  let classYear = $state('');
   let gradDate = $state('');
   let linkedinUrl = $state('');
   let resumeFileName = $state('');
   let resumeS3Key = $state('');
   let saved = $state(false);
   let saveError = $state('');
+  let uinError = $state('');
   let saving = $state(false);
 
   function syncFormFromProfile() {
     const p = $profile;
     name = p.name ?? '';
     uin = p.uin ?? '';
+    degree = p.degree ?? '';
     major = p.major ?? '';
-    classYear = p.classYear ?? '';
     gradDate = p.gradDate ?? '';
     linkedinUrl = p.linkedinUrl ?? '';
     resumeFileName = p.resumeFileName ?? '';
     resumeS3Key = p.resumeS3Key ?? '';
+  }
+
+  function handleUinInput(e) {
+    const v = e.target?.value ?? '';
+    if (v === '' || /^\d*$/.test(v)) uin = v.slice(0, 9);
+    uinError = '';
   }
 
   // When panel opens: fetch profile then sync form so data shows on first open.
@@ -49,8 +57,8 @@
       const p = $profile;
       name = p.name ?? '';
       uin = p.uin ?? '';
+      degree = p.degree ?? '';
       major = p.major ?? '';
-      classYear = p.classYear ?? '';
       gradDate = p.gradDate ?? '';
       linkedinUrl = p.linkedinUrl ?? '';
       resumeFileName = p.resumeFileName ?? '';
@@ -69,12 +77,25 @@
   async function handleSubmit(event) {
     event.preventDefault();
     saveError = '';
+    uinError = '';
+    if (!validateUin(uin)) {
+      uinError = 'UIN must be exactly 9 digits.';
+      return;
+    }
+    if (!degree) {
+      saveError = 'Please select a degree.';
+      return;
+    }
+    if (!major) {
+      saveError = 'Please select a major.';
+      return;
+    }
     saving = true;
     const result = await updateProfile({
       name,
-      uin,
+      uin: uin.trim(),
+      degree,
       major,
-      classYear,
       gradDate,
       linkedInUrl: linkedinUrl || undefined,
       resumeS3Key: resumeS3Key || undefined,
@@ -97,33 +118,44 @@
 </script>
 
 {#if open}
-  <div class="backdrop" role="dialog" aria-modal="true" aria-labelledby="profile-panel-title" on:click={handleBackdropClick}>
-    <div class="panel" on:click|self>
+  <div class="backdrop" role="dialog" aria-modal="true" aria-labelledby="profile-panel-title" onclick={handleBackdropClick}>
+    <div class="panel" onclick={(e) => e.stopPropagation()}>
       <div class="panel-header">
         <h2 id="profile-panel-title">My Profile</h2>
-        <button type="button" class="btn-close" on:click={closePanel} aria-label="Close">×</button>
+        <button type="button" class="btn-close" onclick={closePanel} aria-label="Close">×</button>
       </div>
       <p class="panel-subtitle">View and edit your student profile. Recruiters use this to discover you.</p>
 
-      <form class="profile-form" on:submit={handleSubmit}>
+      <form class="profile-form" onsubmit={handleSubmit}>
         <div class="field">
           <label for="profile-name">Name</label>
           <input id="profile-name" type="text" bind:value={name} required placeholder="Your full name" />
         </div>
         <div class="field">
           <label for="profile-uin">UIN</label>
-          <input id="profile-uin" type="text" bind:value={uin} required placeholder="e.g., 123456789" />
+          <input id="profile-uin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="9" value={uin} oninput={handleUinInput} required placeholder="9 digits, e.g. 123456789" />
+          {#if uinError}
+            <p class="error-message">{uinError}</p>
+          {/if}
+        </div>
+        <div class="field">
+          <label for="profile-degree">Degree</label>
+          <select id="profile-degree" bind:value={degree} required>
+            {#each DEGREE_OPTIONS as opt}
+              <option value={opt.value}>{opt.label}</option>
+            {/each}
+          </select>
         </div>
         <div class="field">
           <label for="profile-major">Major</label>
-          <input id="profile-major" type="text" bind:value={major} required placeholder="e.g., Computer Science" />
+          <select id="profile-major" bind:value={major} required>
+            {#each MAJOR_OPTIONS as opt}
+              <option value={opt.value}>{opt.label}</option>
+            {/each}
+          </select>
         </div>
         <div class="field">
-          <label for="profile-classYear">Class Year <span class="hint">(e.g., '26)</span></label>
-          <input id="profile-classYear" type="text" bind:value={classYear} required maxlength="4" placeholder="'26" />
-        </div>
-        <div class="field">
-          <label for="profile-gradDate">Grad Date</label>
+          <label for="profile-gradDate">Graduation Year</label>
           <input id="profile-gradDate" type="month" bind:value={gradDate} required />
         </div>
         <div class="field">
@@ -135,7 +167,7 @@
           <p class="error-message">{saveError}</p>
         {/if}
         <div class="actions">
-          <button type="button" class="btn-secondary" on:click={closePanel}>Cancel</button>
+          <button type="button" class="btn-secondary" onclick={closePanel}>Cancel</button>
           <button type="submit" class="btn-primary" disabled={saving}>{saving ? 'Saving…' : 'Save changes'}</button>
         </div>
         {#if saved}
@@ -143,7 +175,7 @@
         {/if}
       </form>
       <div class="panel-footer">
-        <button type="button" class="btn-signout" on:click={handleSignOut}>Sign Out</button>
+        <button type="button" class="btn-signout" onclick={handleSignOut}>Sign Out</button>
       </div>
     </div>
   </div>
@@ -244,10 +276,20 @@
     background: #fdfbf9;
   }
 
-  input:focus {
+  input:focus, select:focus {
     outline: none;
     border-color: var(--cmis-maroon, #500000);
     box-shadow: 0 0 0 2px rgba(80, 0, 0, 0.15);
+  }
+
+  select {
+    padding: 0.55rem 0.7rem;
+    font-size: 0.95rem;
+    border-radius: 6px;
+    border: 1px solid #c9c3bc;
+    background: #fdfbf9;
+    color: #1a1a1a;
+    cursor: pointer;
   }
 
   .actions {

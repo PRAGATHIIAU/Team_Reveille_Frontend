@@ -4,14 +4,16 @@
   import { currentView } from './stores/viewStore.js';
   import { createProfile } from './api.js';
   import ResumeSection from './ResumeSection.svelte';
+  import { DEGREE_OPTIONS, MAJOR_OPTIONS, validateUin } from './profileOptions.js';
 
   let name = '';
   let uin = '';
+  let degree = '';
   let major = '';
-  let classYear = '';
   let gradDate = '';
   let linkedinUrl = '';
   let submitError = '';
+  let uinError = '';
   let submitting = false;
   let submitted = false;
 
@@ -19,22 +21,42 @@
     const p = $profile;
     if (p.name) name = p.name;
     if (p.uin) uin = p.uin;
+    if (p.degree) degree = p.degree;
     if (p.major) major = p.major;
-    if (p.classYear) classYear = p.classYear;
     if (p.gradDate) gradDate = p.gradDate;
     if (p.linkedinUrl) linkedinUrl = p.linkedinUrl;
   });
 
+  function handleUinInput(e) {
+    const v = e.target?.value ?? '';
+    if (v === '' || /^\d*$/.test(v)) uin = v.slice(0, 9);
+    uinError = '';
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     submitError = '';
+    uinError = '';
+
+    if (!validateUin(uin)) {
+      uinError = 'UIN must be exactly 9 digits.';
+      return;
+    }
+    if (!degree) {
+      submitError = 'Please select a degree.';
+      return;
+    }
+    if (!major) {
+      submitError = 'Please select a major.';
+      return;
+    }
 
     submitting = true;
     const result = await createProfile({
       name,
-      uin,
+      uin: uin.trim(),
+      degree,
       major,
-      classYear,
       gradDate,
       linkedInUrl: linkedinUrl || undefined,
       resumeS3Key: null,
@@ -59,7 +81,7 @@
     Fill out your details so TAMU CMIS recruiters can discover you.
   </p>
 
-  <form class="profile-form" on:submit={handleSubmit}>
+  <form class="profile-form" onsubmit={handleSubmit}>
     <div class="field">
       <label for="name">Name</label>
       <input
@@ -76,37 +98,39 @@
       <input
         id="uin"
         type="text"
-        bind:value={uin}
+        inputmode="numeric"
+        pattern="[0-9]*"
+        maxlength="9"
+        value={uin}
+        oninput={handleUinInput}
         required
-        placeholder="e.g., 123456789"
+        placeholder="9 digits, e.g. 123456789"
       />
+      {#if uinError}
+        <p class="error-message">{uinError}</p>
+      {/if}
+    </div>
+
+    <div class="field">
+      <label for="degree">Degree</label>
+      <select id="degree" bind:value={degree} required>
+        {#each DEGREE_OPTIONS as opt}
+          <option value={opt.value}>{opt.label}</option>
+        {/each}
+      </select>
     </div>
 
     <div class="field">
       <label for="major">Major</label>
-      <input
-        id="major"
-        type="text"
-        bind:value={major}
-        required
-        placeholder="e.g., Computer Science"
-      />
+      <select id="major" bind:value={major} required>
+        {#each MAJOR_OPTIONS as opt}
+          <option value={opt.value}>{opt.label}</option>
+        {/each}
+      </select>
     </div>
 
     <div class="field">
-      <label for="classYear">Class Year<span class="hint"> (e.g., '26)</span></label>
-      <input
-        id="classYear"
-        type="text"
-        bind:value={classYear}
-        required
-        maxlength="4"
-        placeholder="'26"
-      />
-    </div>
-
-    <div class="field">
-      <label for="gradDate">Grad Date</label>
+      <label for="gradDate">Graduation Year</label>
       <input
         id="gradDate"
         type="month"
@@ -210,11 +234,21 @@
     color: #b0a79e;
   }
 
-  input:focus {
+  input:focus, select:focus {
     outline: none;
     border-color: #500000;
     box-shadow: 0 0 0 2px rgba(80, 0, 0, 0.16);
     background-color: #ffffff;
+  }
+
+  select {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.95rem;
+    border-radius: 6px;
+    border: 1px solid #c9c3bc;
+    background-color: #fdfbf9;
+    color: #1b1b1b;
+    cursor: pointer;
   }
 
   .submit-button {

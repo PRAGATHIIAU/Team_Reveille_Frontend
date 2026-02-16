@@ -53,6 +53,7 @@ export async function fetchUserProfile(user) {
     profile.set({
       name: data.name ?? '',
       uin: data.uin ?? '',
+      degree: data.degree ?? '',
       major: data.major ?? '',
       classYear: data.classYear ?? '',
       gradDate: data.gradDate ?? '',
@@ -61,6 +62,13 @@ export async function fetchUserProfile(user) {
       resumeS3Key: data.resumeS3Key ?? '',
     });
   } catch (_) {}
+}
+
+/** Derive classYear from gradDate (e.g. "2026-05" -> "26") for backend */
+function classYearFromGradDate(gradDate) {
+  if (!gradDate || typeof gradDate !== 'string') return '';
+  const y = gradDate.slice(0, 4);
+  return y.length === 4 ? y.slice(2) : '';
 }
 
 /**
@@ -85,8 +93,9 @@ export async function createProfile(body) {
       body: JSON.stringify({
         name: body.name,
         uin: body.uin,
+        degree: body.degree || undefined,
         major: body.major,
-        classYear: body.classYear,
+        classYear: classYearFromGradDate(body.gradDate),
         gradDate: body.gradDate,
         linkedInUrl: body.linkedInUrl || undefined,
         resumeS3Key: body.resumeS3Key || undefined,
@@ -99,6 +108,7 @@ export async function createProfile(body) {
     profile.set({
       name: data.name ?? '',
       uin: data.uin ?? '',
+      degree: data.degree ?? '',
       major: data.major ?? '',
       classYear: data.classYear ?? '',
       gradDate: data.gradDate ?? '',
@@ -123,9 +133,12 @@ export async function updateProfile(body) {
     const payload = {};
     if (body.name !== undefined) payload.name = body.name;
     if (body.uin !== undefined) payload.uin = body.uin;
+    if (body.degree !== undefined) payload.degree = body.degree;
     if (body.major !== undefined) payload.major = body.major;
-    if (body.classYear !== undefined) payload.classYear = body.classYear;
-    if (body.gradDate !== undefined) payload.gradDate = body.gradDate;
+    if (body.gradDate !== undefined) {
+      payload.gradDate = body.gradDate;
+      payload.classYear = classYearFromGradDate(body.gradDate);
+    }
     if (body.linkedInUrl !== undefined) payload.linkedInUrl = body.linkedInUrl;
     if (body.resumeS3Key !== undefined) payload.resumeS3Key = body.resumeS3Key;
     const res = await fetch(`${API_BASE}/api/profiles/me`, {
@@ -140,6 +153,7 @@ export async function updateProfile(body) {
     profile.set({
       name: data.name ?? '',
       uin: data.uin ?? '',
+      degree: data.degree ?? '',
       major: data.major ?? '',
       classYear: data.classYear ?? '',
       gradDate: data.gradDate ?? '',
