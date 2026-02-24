@@ -6,9 +6,9 @@
  * the setup in CONFIG_TODO.md.
  */
 
-const getEnv = (key, defaultValue = '') => {
+const getEnv = (key) => {
   const value = import.meta.env[key];
-  return typeof value === 'string' ? value : defaultValue;
+  return typeof value === 'string' ? value : '';
 };
 
 /** Cognito User Pool ID (e.g. us-east-1_xxxxxxxxx) */
@@ -18,16 +18,16 @@ export const userPoolId = getEnv('VITE_COGNITO_USER_POOL_ID');
 export const userPoolClientId = getEnv('VITE_COGNITO_CLIENT_ID');
 
 /** AWS region where the User Pool is (e.g. us-east-1) */
-export const region = getEnv('VITE_COGNITO_REGION', 'us-east-1');
+export const region = getEnv('VITE_COGNITO_REGION');
 
 /** Cognito Hosted UI domain (without https://). e.g. your-domain.auth.us-east-1.amazoncognito.com */
 export const oauthDomain = getEnv('VITE_COGNITO_OAUTH_DOMAIN');
 
 /** Comma-separated redirect URIs for sign-in (must match Cognito App Client settings) */
-export const redirectSignIn = getEnv('VITE_COGNITO_REDIRECT_SIGN_IN', 'http://localhost:5173/');
+export const redirectSignIn = getEnv('VITE_COGNITO_REDIRECT_SIGN_IN');
 
 /** Comma-separated redirect URIs for sign-out */
-export const redirectSignOut = getEnv('VITE_COGNITO_REDIRECT_SIGN_OUT', 'http://localhost:5173/');
+export const redirectSignOut = getEnv('VITE_COGNITO_REDIRECT_SIGN_OUT');
 
 /**
  * Whether auth config is present enough to use Google SSO.

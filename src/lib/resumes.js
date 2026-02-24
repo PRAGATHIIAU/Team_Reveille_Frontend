@@ -5,11 +5,9 @@
  */
 
 import { getCognitoIdToken } from './auth.js';
+import { getApiBase } from './api.js';
 
-const API_BASE =
-  typeof import.meta.env?.VITE_API_BASE_URL === 'string' && import.meta.env.VITE_API_BASE_URL
-    ? import.meta.env.VITE_API_BASE_URL.replace(/\/$/, '')
-    : 'https://2gzy1e8qga.execute-api.us-east-1.amazonaws.com/dev';
+const API_BASE = getApiBase();
 
 const PDF_MAX_BYTES = 5 * 1024 * 1024; // 5MB
 
@@ -46,6 +44,7 @@ export async function getUploadUrl(fileName, contentType) {
     if (!res.ok) {
       return { ok: false, error: userFacingError(res, data), status: res.status };
     }
+    console.log('Resume presigned URL fetched:', data.uploadUrl);
     return {
       ok: true,
       uploadUrl: data.uploadUrl,

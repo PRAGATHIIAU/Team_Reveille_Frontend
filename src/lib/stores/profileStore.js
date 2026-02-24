@@ -2,6 +2,7 @@ import { writable } from 'svelte/store';
 
 const defaultProfile = () => ({
   name: '',
+  email: '',
   uin: '',
   degree: '',
   major: '',

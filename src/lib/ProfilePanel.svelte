@@ -9,6 +9,7 @@
 
   let { open = $bindable(false) } = $props();
   let name = $state('');
+  let email = $state('');
   let uin = $state('');
   let degree = $state('');
   let major = $state('');
@@ -24,6 +25,7 @@
   function syncFormFromProfile() {
     const p = $profile;
     name = p.name ?? '';
+    email = p.email ?? '';
     uin = p.uin ?? '';
     degree = p.degree ?? '';
     major = p.major ?? '';
@@ -56,6 +58,7 @@
     if (open) {
       const p = $profile;
       name = p.name ?? '';
+      email = p.email ?? '';
       uin = p.uin ?? '';
       degree = p.degree ?? '';
       major = p.major ?? '';
@@ -90,9 +93,14 @@
       saveError = 'Please select a major.';
       return;
     }
+    if (!email?.trim()) {
+      saveError = 'Please enter your email.';
+      return;
+    }
     saving = true;
     const result = await updateProfile({
       name,
+      email: email.trim(),
       uin: uin.trim(),
       degree,
       major,
@@ -130,6 +138,10 @@
         <div class="field">
           <label for="profile-name">Name</label>
           <input id="profile-name" type="text" bind:value={name} required placeholder="Your full name" />
+        </div>
+        <div class="field">
+          <label for="profile-email">Email</label>
+          <input id="profile-email" type="email" bind:value={email} required placeholder="your.email@tamu.edu" />
         </div>
         <div class="field">
           <label for="profile-uin">UIN</label>

@@ -133,6 +133,12 @@
             <div class="card-avatar" aria-hidden="true">{(student.name ?? '?').charAt(0).toUpperCase()}</div>
             <h3 class="card-name">{student.name ?? '—'}</h3>
             <dl class="card-details">
+              {#if student.email}
+                <div class="detail">
+                  <dt>Email</dt>
+                  <dd><a href="mailto:{student.email}" class="card-email">{student.email}</a></dd>
+                </div>
+              {/if}
               <div class="detail">
                 <dt>Degree</dt>
                 <dd>{student.degree ?? '—'}</dd>
@@ -509,6 +515,16 @@
   .detail dd {
     margin: 0;
     color: var(--text);
+  }
+
+  .card-email {
+    color: var(--maroon);
+    text-decoration: none;
+    word-break: break-all;
+  }
+
+  .card-email:hover {
+    text-decoration: underline;
   }
 
   .card-linkedin {

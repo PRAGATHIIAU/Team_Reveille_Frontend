@@ -5,10 +5,19 @@
 import { getCognitoIdToken } from './auth.js';
 import { profile } from './stores/profileStore.js';
 
-const API_BASE =
-  typeof import.meta.env?.VITE_API_BASE_URL === 'string' && import.meta.env.VITE_API_BASE_URL
-    ? import.meta.env.VITE_API_BASE_URL.replace(/\/$/, '')
-    : 'https://2gzy1e8qga.execute-api.us-east-1.amazonaws.com/dev';
+/**
+ * API base URL from env (no trailing slash). Throws if VITE_API_BASE_URL is missing.
+ * @returns {string}
+ */
+export function getApiBase() {
+  const u = import.meta.env?.VITE_API_BASE_URL;
+  if (typeof u !== 'string' || !u.trim()) {
+    throw new Error('VITE_API_BASE_URL must be set in .env');
+  }
+  return u.trim().replace(/\/+$/, '');
+}
+
+const API_BASE = getApiBase();
 
 const getAuthHeaders = async () => {
   const headers = { 'Content-Type': 'application/json' };
@@ -53,6 +62,7 @@ export async function fetchUserProfile(user) {
     const data = await res.json();
     profile.set({
       name: data.name ?? '',
+      email: data.email ?? '',
       uin: data.uin ?? '',
       degree: data.degree ?? '',
       major: data.major ?? '',
@@ -76,9 +86,10 @@ function classYearFromGradDate(gradDate) {
  * Create a new student profile (first-time sign-in).
  * @param {{
  *   name: string;
+ *   email: string;
  *   uin: string;
+ *   degree?: string;
  *   major: string;
- *   classYear: string;
  *   gradDate: string;
  *   linkedInUrl?: string;
  *   resumeS3Key?: string | null;
@@ -93,6 +104,7 @@ export async function createProfile(body) {
       headers,
       body: JSON.stringify({
         name: body.name,
+        email: body.email || undefined,
         uin: body.uin,
         degree: body.degree || undefined,
         major: body.major,
@@ -108,6 +120,7 @@ export async function createProfile(body) {
     }
     profile.set({
       name: data.name ?? '',
+      email: data.email ?? '',
       uin: data.uin ?? '',
       degree: data.degree ?? '',
       major: data.major ?? '',
@@ -125,7 +138,7 @@ export async function createProfile(body) {
 
 /**
  * Update current user's profile (partial update).
- * @param {Partial<{ name: string; uin: string; major: string; classYear: string; gradDate: string; linkedInUrl: string; resumeS3Key: string }>} body
+ * @param {Partial<{ name: string; email: string; uin: string; degree: string; major: string; gradDate: string; linkedInUrl: string; resumeS3Key: string }>} body
  * @returns {Promise<{ ok: boolean; error?: string; data?: object }>}
  */
 export async function updateProfile(body) {
@@ -133,6 +146,7 @@ export async function updateProfile(body) {
     const headers = await getAuthHeaders();
     const payload = {};
     if (body.name !== undefined) payload.name = body.name;
+    if (body.email !== undefined) payload.email = body.email;
     if (body.uin !== undefined) payload.uin = body.uin;
     if (body.degree !== undefined) payload.degree = body.degree;
     if (body.major !== undefined) payload.major = body.major;
@@ -153,6 +167,7 @@ export async function updateProfile(body) {
     }
     profile.set({
       name: data.name ?? '',
+      email: data.email ?? '',
       uin: data.uin ?? '',
       degree: data.degree ?? '',
       major: data.major ?? '',

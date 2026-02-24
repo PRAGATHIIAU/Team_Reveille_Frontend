@@ -7,6 +7,7 @@
   import { DEGREE_OPTIONS, MAJOR_OPTIONS, validateUin } from './profileOptions.js';
 
   let name = '';
+  let email = '';
   let uin = '';
   let degree = '';
   let major = '';
@@ -20,6 +21,7 @@
   onMount(() => {
     const p = $profile;
     if (p.name) name = p.name;
+    if (p.email) email = p.email;
     if (p.uin) uin = p.uin;
     if (p.degree) degree = p.degree;
     if (p.major) major = p.major;
@@ -42,6 +44,10 @@
       uinError = 'UIN must be exactly 9 digits.';
       return;
     }
+    if (!email?.trim()) {
+      submitError = 'Please enter your email.';
+      return;
+    }
     if (!degree) {
       submitError = 'Please select a degree.';
       return;
@@ -54,12 +60,13 @@
     submitting = true;
     const result = await createProfile({
       name,
+      email: email.trim(),
       uin: uin.trim(),
       degree,
       major,
       gradDate,
       linkedInUrl: linkedinUrl || undefined,
-      resumeS3Key: null,
+      resumeS3Key: $profile.resumeS3Key || undefined,
     });
     submitting = false;
 
@@ -90,6 +97,17 @@
         bind:value={name}
         required
         placeholder="Your full name"
+      />
+    </div>
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input
+        id="email"
+        type="email"
+        bind:value={email}
+        required
+        placeholder="your.email@tamu.edu"
       />
     </div>
 

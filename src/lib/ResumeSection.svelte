@@ -7,6 +7,7 @@
     getDownloadUrl,
     PDF_MAX_BYTES_EXPORT as PDF_MAX_BYTES,
   } from './resumes.js';
+  import { profile } from './stores/profileStore.js';
 
   let { open = true, onUploadSuccess } = $props();
 
@@ -106,6 +107,15 @@
       uploadError = completeResult.error || 'Upload failed, please retry.';
       return;
     }
+
+    // Update profile store so create/update profile can persist this S3 key to DynamoDB
+    const s3Key = urlResult.s3Key ?? '';
+    const fileName = selectedFile?.name ?? (s3Key ? s3Key.split('/').pop() : '') ?? '';
+    profile.update((p) => ({
+      ...p,
+      resumeS3Key: s3Key,
+      resumeFileName: fileName,
+    }));
 
     uploadSuccess = true;
     selectedFile = null;
