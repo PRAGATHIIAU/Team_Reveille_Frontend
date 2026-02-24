@@ -1,7 +1,7 @@
-<script>
-  let count = $state(0)
+<script lang="ts">
+  let count = $state(0);
   const increment = () => {
-    count += 1
+    count += 1;
   }
 </script>
 

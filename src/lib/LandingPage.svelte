@@ -1,15 +1,15 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
-  import { signInWithGoogle } from './auth.js';
-  import { authUser } from './stores/authStore.js';
-  import { currentView } from './stores/viewStore.js';
+  import { signInWithGoogle } from './auth';
+  import { authUser } from './stores/authStore';
+  import { currentView } from './stores/viewStore';
   import ProfilePanel from './ProfilePanel.svelte';
 
   let showProfilePanel = $state(false);
 
   onMount(async () => {
-    const { getAuthUser, getSession, getCognitoIdToken } = await import('./auth.js');
-    const { checkIsFirstTimeSignIn, fetchUserProfile } = await import('./api.js');
+    const { getAuthUser, getSession, getCognitoIdToken } = await import('./auth');
+    const { checkIsFirstTimeSignIn, fetchUserProfile } = await import('./api');
     const isOAuthCallback = typeof window !== 'undefined' && window.location.search.includes('code=');
     
     // After OAuth redirect, allow time for the auth module to exchange the code

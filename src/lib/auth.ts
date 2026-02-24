@@ -5,7 +5,8 @@
 
 import { Amplify } from 'aws-amplify';
 import { signInWithRedirect, signOut, getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
-import { isAuthConfigured, getAmplifyAuthConfig } from '../config/auth.config.js';
+import type { AuthUser } from 'aws-amplify/auth';
+import { isAuthConfigured, getAmplifyAuthConfig } from '../config/auth.config';
 
 // Configure Amplify as soon as this module loads (so OAuth callback can complete).
 if (isAuthConfigured()) {
@@ -24,7 +25,7 @@ if (isAuthConfigured()) {
  * Start Google SSO (redirects to Cognito Hosted UI → Google).
  * Students use TAMU Google (e.g. aupragathii@tamu.edu); no password sign-up.
  */
-export async function signInWithGoogle() {
+export async function signInWithGoogle(): Promise<void> {
   if (!isAuthConfigured()) {
     console.warn('[auth] Auth not configured. Add .env from .env.example and complete CONFIG_TODO.md.');
     return;
@@ -35,16 +36,15 @@ export async function signInWithGoogle() {
 /**
  * Sign out (redirects to Cognito sign-out then back to redirectSignOut).
  */
-export async function signOutUser() {
+export async function signOutUser(): Promise<void> {
   if (!isAuthConfigured()) return;
   await signOut();
 }
 
 /**
  * Get current authenticated user, if any.
- * @returns {Promise<import('aws-amplify/auth').AuthUser | null>}
  */
-export async function getAuthUser() {
+export async function getAuthUser(): Promise<AuthUser | null> {
   if (!isAuthConfigured()) return null;
   try {
     return await getCurrentUser();
@@ -55,9 +55,8 @@ export async function getAuthUser() {
 
 /**
  * Get the current session (tokens). Useful for API calls.
- * @returns {Promise<import('aws-amplify/auth').FetchAuthSessionOutput | null>}
  */
-export async function getSession() {
+export async function getSession(): Promise<Awaited<ReturnType<typeof fetchAuthSession>> | null> {
   if (!isAuthConfigured()) return null;
   try {
     return await fetchAuthSession();
@@ -69,9 +68,8 @@ export async function getSession() {
 /**
  * Get the Cognito ID token as a raw JWT string for the Authorization header.
  * Returns the full token so the client can send exactly: Authorization: Bearer <token>
- * @returns {Promise<string | null>} The full ID token JWT string, or null if not signed in / no token.
  */
-export async function getCognitoIdToken() {
+export async function getCognitoIdToken(): Promise<string | null> {
   if (!isAuthConfigured()) return null;
   try {
     const session = await fetchAuthSession();
@@ -80,8 +78,8 @@ export async function getCognitoIdToken() {
     const raw =
       typeof idToken === 'string'
         ? idToken
-        : typeof idToken?.toString === 'function'
-          ? idToken.toString()
+        : typeof (idToken as { toString?: () => string })?.toString === 'function'
+          ? (idToken as { toString: () => string }).toString()
           : null;
     if (!raw || typeof raw !== 'string' || raw.trim() === '') return null;
     const trimmed = raw.trim();

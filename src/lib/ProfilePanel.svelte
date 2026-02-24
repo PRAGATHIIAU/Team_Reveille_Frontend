@@ -1,11 +1,11 @@
-<script>
-  import { signOutUser } from './auth.js';
-  import { profile } from './stores/profileStore.js';
-  import { authUser } from './stores/authStore.js';
-  import { currentView } from './stores/viewStore.js';
-  import { fetchUserProfile, updateProfile } from './api.js';
+<script lang="ts">
+  import { signOutUser } from './auth';
+  import { profile } from './stores/profileStore';
+  import { authUser } from './stores/authStore';
+  import { currentView } from './stores/viewStore';
+  import { fetchUserProfile, updateProfile } from './api';
   import ResumeSection from './ResumeSection.svelte';
-  import { DEGREE_OPTIONS, MAJOR_OPTIONS, validateUin } from './profileOptions.js';
+  import { DEGREE_OPTIONS, MAJOR_OPTIONS, validateUin } from './profileOptions';
 
   let { open = $bindable(false) } = $props();
   let name = $state('');
@@ -15,7 +15,6 @@
   let major = $state('');
   let gradDate = $state('');
   let linkedinUrl = $state('');
-  let resumeFileName = $state('');
   let resumeS3Key = $state('');
   let saved = $state(false);
   let saveError = $state('');
@@ -31,12 +30,11 @@
     major = p.major ?? '';
     gradDate = p.gradDate ?? '';
     linkedinUrl = p.linkedinUrl ?? '';
-    resumeFileName = p.resumeFileName ?? '';
     resumeS3Key = p.resumeS3Key ?? '';
   }
 
-  function handleUinInput(e) {
-    const v = e.target?.value ?? '';
+  function handleUinInput(e: Event) {
+    const v = (e.target as HTMLInputElement | null)?.value ?? '';
     if (v === '' || /^\d*$/.test(v)) uin = v.slice(0, 9);
     uinError = '';
   }
@@ -64,7 +62,6 @@
       major = p.major ?? '';
       gradDate = p.gradDate ?? '';
       linkedinUrl = p.linkedinUrl ?? '';
-      resumeFileName = p.resumeFileName ?? '';
       resumeS3Key = p.resumeS3Key ?? '';
     }
   });
@@ -73,11 +70,11 @@
     open = false;
   }
 
-  function handleBackdropClick(event) {
+  function handleBackdropClick(event: MouseEvent & { currentTarget: EventTarget & HTMLDivElement }) {
     if (event.target === event.currentTarget) closePanel();
   }
 
-  async function handleSubmit(event) {
+  async function handleSubmit(event: SubmitEvent) {
     event.preventDefault();
     saveError = '';
     uinError = '';

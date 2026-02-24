@@ -1,13 +1,14 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
-  import { currentView } from './stores/viewStore.js';
-  import { listProfiles } from './api.js';
-  import { DEGREE_OPTIONS, MAJOR_OPTIONS } from './profileOptions.js';
+  import { currentView } from './stores/viewStore';
+  import { listProfiles } from './api';
+  import { DEGREE_OPTIONS, MAJOR_OPTIONS } from './profileOptions';
+  import type { ListProfilesResult } from './types';
 
   let nameFilter = $state('');
   let majorFilter = $state('');
   let degreeFilter = $state('');
-  let allProfiles = $state([]);
+  let allProfiles = $state<NonNullable<ListProfilesResult['profiles']>>([]);
   let loading = $state(true);
   let error = $state('');
 
@@ -28,7 +29,7 @@
     })()
   );
 
-  function goBack(e) {
+  function goBack(e: MouseEvent) {
     e.preventDefault();
     currentView.set('landing');
   }
@@ -46,7 +47,7 @@
     }
   }
 
-  function formatGradDate(gradDate) {
+  function formatGradDate(gradDate: string | undefined): string {
     if (!gradDate || typeof gradDate !== 'string') return '—';
     const [y, m] = gradDate.split('-');
     if (y && m) return `${y}`;
@@ -153,7 +154,7 @@
               </div>
             </dl>
             {#if student.linkedInUrl ?? student.linkedinUrl}
-              {@const linkedIn = student.linkedInUrl ?? student.linkedinUrl}
+              {@const linkedIn = student.linkedInUrl ?? student.linkedinUrl ?? ''}
               <a
                 href={linkedIn.startsWith('http') ? linkedIn : `https://${linkedIn}`}
                 target="_blank"

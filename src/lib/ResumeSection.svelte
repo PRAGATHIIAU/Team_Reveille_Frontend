@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {
     getUploadUrl,
     uploadToPresignedUrl,
@@ -6,10 +6,14 @@
     listMyResumes,
     getDownloadUrl,
     PDF_MAX_BYTES_EXPORT as PDF_MAX_BYTES,
-  } from './resumes.js';
-  import { profile } from './stores/profileStore.js';
+  } from './resumes';
+  import { profile } from './stores/profileStore';
 
-  let { open = true, onUploadSuccess } = $props();
+  interface Props {
+    open?: boolean;
+    onUploadSuccess?: () => void;
+  }
+  let { open = true, onUploadSuccess }: Props = $props();
 
   // Fetch from GET /api/resumes/me whenever the section is shown (no stale data).
   $effect(() => {
@@ -17,25 +21,33 @@
       loadResumes();
     }
   });
-  let selectedFile = $state(null);
+  let selectedFile = $state<File | null>(null);
   let fileError = $state('');
   let uploadProgress = $state(0);
   let uploading = $state(false);
   let uploadSuccess = $state(false);
   let uploadError = $state('');
-  let resumes = $state([]);
+  interface ResumeItem {
+    id?: string;
+    resumeId?: string;
+    fileName?: string;
+    name?: string;
+    s3Key?: string;
+  }
+  let resumes = $state<ResumeItem[]>([]);
   let listLoading = $state(false);
   let listError = $state('');
-  let downloadLoadingId = $state(null);
+  let downloadLoadingId = $state<string | null>(null);
 
-  function formatSize(bytes) {
+  function formatSize(bytes: number): string {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
-  function handleFileChange(event) {
-    const file = event.target?.files?.[0];
+  function handleFileChange(event: Event) {
+    const target = event.target as HTMLInputElement | null;
+    const file = target?.files?.[0];
     selectedFile = null;
     fileError = '';
     uploadError = '';
@@ -62,7 +74,7 @@
     const result = await listMyResumes();
     listLoading = false;
     if (result.ok) {
-      resumes = result.resumes ?? [];
+      resumes = (result.resumes ?? []) as ResumeItem[];
     } else {
       listError = result.error || 'Failed to load resumes.';
       if (result.status === 401) listError = 'Session expired, please sign in again.';
@@ -123,8 +135,8 @@
     await loadResumes();
   }
 
-  async function handleDownload(resume) {
-    const id = resume.id ?? resume.resumeId ?? resume;
+  async function handleDownload(resume: ResumeItem | string) {
+    const id = typeof resume === 'object' ? (resume?.id ?? resume?.resumeId) : resume;
     if (!id) return;
     downloadLoadingId = id;
     const result = await getDownloadUrl(id);

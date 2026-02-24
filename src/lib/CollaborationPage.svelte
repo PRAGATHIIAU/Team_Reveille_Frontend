@@ -1,9 +1,13 @@
-<script>
-  import { currentView } from './stores/viewStore.js';
+<script lang="ts">
+  import { currentView } from './stores/viewStore';
 
-  let { title = '', content = '' } = $props();
+  interface Props {
+    title?: string;
+    content?: string;
+  }
+  let { title = '', content = '' }: Props = $props();
 
-  function goBack(e) {
+  function goBack(e: MouseEvent) {
     e.preventDefault();
     currentView.set('landing');
   }

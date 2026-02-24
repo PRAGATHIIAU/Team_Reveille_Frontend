@@ -6,7 +6,15 @@
  * the setup in CONFIG_TODO.md.
  */
 
-const getEnv = (key) => {
+type EnvKey =
+  | 'VITE_COGNITO_USER_POOL_ID'
+  | 'VITE_COGNITO_CLIENT_ID'
+  | 'VITE_COGNITO_REGION'
+  | 'VITE_COGNITO_OAUTH_DOMAIN'
+  | 'VITE_COGNITO_REDIRECT_SIGN_IN'
+  | 'VITE_COGNITO_REDIRECT_SIGN_OUT';
+
+const getEnv = (key: EnvKey): string => {
   const value = import.meta.env[key];
   return typeof value === 'string' ? value : '';
 };
@@ -33,7 +41,7 @@ export const redirectSignOut = getEnv('VITE_COGNITO_REDIRECT_SIGN_OUT');
  * Whether auth config is present enough to use Google SSO.
  * Used to avoid calling Amplify when not configured (e.g. first run).
  */
-export function isAuthConfigured() {
+export function isAuthConfigured(): boolean {
   return !!(userPoolId && userPoolClientId && oauthDomain);
 }
 
@@ -50,7 +58,7 @@ export function getAmplifyAuthConfig() {
         scopes: ['openid', 'email', 'profile'],
         redirectSignIn: redirectSignIn.split(',').map((s) => s.trim()).filter(Boolean),
         redirectSignOut: redirectSignOut.split(',').map((s) => s.trim()).filter(Boolean),
-        responseType: 'code',
+        responseType: 'code' as const,
       },
     },
   };

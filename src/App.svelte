@@ -1,9 +1,9 @@
-<script>
+<script lang="ts">
   import LandingPage from './lib/LandingPage.svelte';
   import ProfileForm from './lib/ProfileForm.svelte';
   import CollaborationPage from './lib/CollaborationPage.svelte';
   import StudentsConnect from './lib/StudentsConnect.svelte';
-  import { currentView } from './lib/stores/viewStore.js';
+  import { currentView } from './lib/stores/viewStore';
 </script>
 
 <style>

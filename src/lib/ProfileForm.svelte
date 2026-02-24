@@ -1,10 +1,10 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
-  import { profile } from './stores/profileStore.js';
-  import { currentView } from './stores/viewStore.js';
-  import { createProfile } from './api.js';
+  import { profile } from './stores/profileStore';
+  import { currentView } from './stores/viewStore';
+  import { createProfile } from './api';
   import ResumeSection from './ResumeSection.svelte';
-  import { DEGREE_OPTIONS, MAJOR_OPTIONS, validateUin } from './profileOptions.js';
+  import { DEGREE_OPTIONS, MAJOR_OPTIONS, validateUin } from './profileOptions';
 
   let name = '';
   let email = '';
@@ -29,13 +29,13 @@
     if (p.linkedinUrl) linkedinUrl = p.linkedinUrl;
   });
 
-  function handleUinInput(e) {
-    const v = e.target?.value ?? '';
+  function handleUinInput(e: Event) {
+    const v = (e.target as HTMLInputElement | null)?.value ?? '';
     if (v === '' || /^\d*$/.test(v)) uin = v.slice(0, 9);
     uinError = '';
   }
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
     submitError = '';
     uinError = '';
